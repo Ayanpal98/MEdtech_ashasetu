@@ -4,6 +4,7 @@ import {
   Activity, 
   ArrowUpRight, 
   BadgeCheck, 
+  Bell,
   Brain, 
   Building2, 
   Calendar, 
@@ -886,6 +887,38 @@ export default function App() {
                 </div>
               </div>
             </div>
+
+            {/* Quick Access Functionalities */}
+            <div className="flex items-center gap-8 md:gap-12">
+              <button 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="flex flex-col items-center gap-1.5 group"
+              >
+                <div className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center group-hover:border-accent group-hover:text-accent transition-all">
+                  <Activity size={18} />
+                </div>
+                <span className="font-mono text-[9px] tracking-widest text-muted group-hover:text-accent uppercase">Home</span>
+              </button>
+              <a href="#diseases" className="flex flex-col items-center gap-1.5 group">
+                <div className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center group-hover:border-accent group-hover:text-accent transition-all">
+                  <Users size={18} />
+                </div>
+                <span className="font-mono text-[9px] tracking-widest text-muted group-hover:text-accent uppercase">Patients</span>
+              </a>
+              <a href="#problems" className="flex flex-col items-center gap-1.5 group">
+                <div className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center group-hover:border-accent group-hover:text-accent transition-all">
+                  <Bell size={18} />
+                </div>
+                <span className="font-mono text-[9px] tracking-widest text-muted group-hover:text-accent uppercase">Alerts</span>
+              </a>
+              <a href="#landscape" className="flex flex-col items-center gap-1.5 group">
+                <div className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center group-hover:border-accent group-hover:text-accent transition-all">
+                  <Users size={18} />
+                </div>
+                <span className="font-mono text-[9px] tracking-widest text-muted group-hover:text-accent uppercase">People</span>
+              </a>
+            </div>
+
             <div className="text-[11px] text-muted md:text-right max-w-xs">
               ATSFY Technologies · Empowering Frontline Healthcare
               <div className="mt-2 text-[9px] opacity-60">

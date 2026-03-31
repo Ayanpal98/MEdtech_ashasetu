@@ -16,7 +16,8 @@ import {
   Camera,
   Mic,
   Save,
-  X
+  X,
+  Phone
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -38,6 +39,18 @@ export const AshaAppPreview = () => {
       setIsSyncing(false);
       triggerToast('Data Synced Successfully');
     }, 1500);
+  };
+
+  const getHeaderTitle = () => {
+    switch(screen) {
+      case 'home': return 'MedTech Tripura';
+      case 'new': return 'নতুন রোগী';
+      case 'screening': return 'স্ক্রিনিং';
+      case 'patients': return 'রোগী তালিকা';
+      case 'alerts': return 'সতর্কবার্তা';
+      case 'people': return 'সহকর্মী';
+      default: return 'MedTech';
+    }
   };
 
   return (
@@ -80,10 +93,10 @@ export const AshaAppPreview = () => {
             <ArrowLeft size={16} className="text-bg cursor-pointer" onClick={() => setScreen('home')} />
           )}
           <span className="font-serif font-bold text-bg text-sm">
-            {screen === 'home' ? 'MedTech Tripura' : screen === 'new' ? 'নতুন রোগী' : 'স্ক্রিনিং'}
+            {getHeaderTitle()}
           </span>
         </div>
-        <div className="relative cursor-pointer">
+        <div className="relative cursor-pointer" onClick={() => setScreen('alerts')}>
           <Bell size={16} className="text-bg" />
           <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-accent" />
         </div>
@@ -131,6 +144,7 @@ export const AshaAppPreview = () => {
                   placeholder="রোগী খুঁজুন (Search Patient)" 
                   className="w-full bg-[#151515] border border-border rounded-sm py-1.5 pl-8 pr-2 text-[10px] text-text outline-none focus:border-accent/50"
                   readOnly
+                  onClick={() => setScreen('patients')}
                 />
               </div>
 
@@ -183,12 +197,155 @@ export const AshaAppPreview = () => {
               </div>
 
               {/* Health Tips / Alerts */}
-              <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-sm">
+              <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-sm cursor-pointer" onClick={() => setScreen('alerts')}>
                 <div className="flex items-center gap-2 mb-1">
                   <AlertCircle size={10} className="text-red-500" />
                   <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Alert: Malaria Spike</span>
                 </div>
                 <p className="text-[8px] text-muted leading-tight">আপনার এলাকায় ম্যালেরিয়া বাড়ছে। মশারি ব্যবহার নিশ্চিত করুন। (Increase in cases in your sector.)</p>
+              </div>
+            </motion.div>
+          )}
+
+          {screen === 'patients' && (
+            <motion.div
+              key="patients"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              className="space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <div className="text-[10px] text-muted uppercase tracking-widest">Patient List</div>
+                <div className="text-[8px] text-accent font-bold">Total: 142</div>
+              </div>
+              
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted" size={10} />
+                <input 
+                  type="text" 
+                  placeholder="খুঁজুন (Search)" 
+                  className="w-full bg-[#151515] border border-border rounded-sm py-1 pl-7 pr-2 text-[9px] text-text outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                {[
+                  { name: 'S. Reang', id: 'TR-0921', risk: 'High' },
+                  { name: 'M. Chakma', id: 'TR-0842', risk: 'Low' },
+                  { name: 'B. Das', id: 'TR-1102', risk: 'Medium' },
+                  { name: 'R. Debbarma', id: 'TR-0731', risk: 'Low' },
+                  { name: 'P. Jamatia', id: 'TR-1254', risk: 'Medium' },
+                  { name: 'K. Tripura', id: 'TR-0998', risk: 'High' },
+                ].map((p, i) => (
+                  <div key={i} className="bg-[#151515] border border-border p-2 rounded-sm flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-accent/5 flex items-center justify-center text-[9px] text-accent font-bold border border-accent/10">
+                        {p.name[0]}
+                      </div>
+                      <div>
+                        <div className="text-[9px] font-bold text-text">{p.name}</div>
+                        <div className="text-[7px] text-muted">ID: {p.id}</div>
+                      </div>
+                    </div>
+                    <div className={`text-[7px] font-bold px-1.5 py-0.5 rounded-xs ${p.risk === 'High' ? 'bg-red-500/10 text-red-500' : p.risk === 'Medium' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-accent/10 text-accent'}`}>
+                      {p.risk}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {screen === 'alerts' && (
+            <motion.div
+              key="alerts"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              className="space-y-4"
+            >
+              <div className="text-[10px] text-muted uppercase tracking-widest">Health Alerts</div>
+              
+              <div className="space-y-3">
+                <div className="bg-red-500/5 border border-red-500/20 p-3 rounded-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle size={14} className="text-red-500" />
+                    <span className="text-[10px] font-bold text-red-500 uppercase">Malaria Outbreak</span>
+                  </div>
+                  <p className="text-[9px] text-muted mb-2">High incidence reported in Majlishpur Sector 2. Immediate screening of all fever cases required.</p>
+                  <div className="text-[7px] text-muted font-mono uppercase">2 Hours Ago</div>
+                </div>
+
+                <div className="bg-accent/5 border border-accent/20 p-3 rounded-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Bell size={14} className="text-accent" />
+                    <span className="text-[10px] font-bold text-accent uppercase">Vaccination Drive</span>
+                  </div>
+                  <p className="text-[9px] text-muted mb-2">Pulse Polio drive scheduled for next Sunday. Please update your target list.</p>
+                  <div className="text-[7px] text-muted font-mono uppercase">Yesterday</div>
+                </div>
+
+                <div className="bg-yellow-500/5 border border-yellow-500/20 p-3 rounded-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <RefreshCw size={14} className="text-yellow-500" />
+                    <span className="text-[10px] font-bold text-yellow-500 uppercase">System Update</span>
+                  </div>
+                  <p className="text-[9px] text-muted mb-2">New TB screening protocols added. Please sync your device to update the AI model.</p>
+                  <div className="text-[7px] text-muted font-mono uppercase">2 Days Ago</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {screen === 'people' && (
+            <motion.div
+              key="people"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              className="space-y-4"
+            >
+              <div className="text-[10px] text-muted uppercase tracking-widest">Sector Team</div>
+              
+              <div className="space-y-3">
+                <div className="bg-[#151515] border border-border p-3 rounded-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                      <User size={20} />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-text">Dr. S. K. Roy</div>
+                      <div className="text-[8px] text-muted uppercase tracking-wider">Medical Officer (MO-IC)</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button className="flex-1 bg-accent/10 border border-accent/20 py-1 rounded-xs text-[8px] font-bold text-accent">CALL</button>
+                    <button className="flex-1 bg-white/5 border border-border py-1 rounded-xs text-[8px] font-bold text-muted">MESSAGE</button>
+                  </div>
+                </div>
+
+                <div className="text-[8px] text-muted uppercase tracking-widest mt-4 mb-2">Other ASHA Workers</div>
+                <div className="space-y-2">
+                  {[
+                    { name: 'Priya Debbarma', role: 'ASHA (Sector 1)' },
+                    { name: 'Rita Reang', role: 'ASHA (Sector 3)' },
+                    { name: 'Sumita Das', role: 'ASHA (Sector 2)' },
+                  ].map((person, i) => (
+                    <div key={i} className="bg-[#151515] border border-border p-2 rounded-sm flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-muted">
+                          {person.name[0]}
+                        </div>
+                        <div>
+                          <div className="text-[9px] font-bold text-text">{person.name}</div>
+                          <div className="text-[7px] text-muted">{person.role}</div>
+                        </div>
+                      </div>
+                      <Phone size={10} className="text-accent cursor-pointer" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}
@@ -311,17 +468,26 @@ export const AshaAppPreview = () => {
           <Activity size={16} />
           <span className="text-[7px] uppercase font-bold">Home</span>
         </div>
-        <div className="flex flex-col items-center gap-0.5 text-muted cursor-pointer">
+        <div 
+          onClick={() => setScreen('patients')}
+          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${screen === 'patients' ? 'text-accent' : 'text-muted'}`}
+        >
           <Users size={16} />
           <span className="text-[7px] uppercase font-bold">Patients</span>
         </div>
-        <div className="flex flex-col items-center gap-0.5 text-muted cursor-pointer">
+        <div 
+          onClick={() => setScreen('alerts')}
+          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${screen === 'alerts' ? 'text-accent' : 'text-muted'}`}
+        >
           <Bell size={16} />
           <span className="text-[7px] uppercase font-bold">Alerts</span>
         </div>
-        <div className="flex flex-col items-center gap-0.5 text-muted cursor-pointer">
-          <User size={16} />
-          <span className="text-[7px] uppercase font-bold">Profile</span>
+        <div 
+          onClick={() => setScreen('people')}
+          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${screen === 'people' ? 'text-accent' : 'text-muted'}`}
+        >
+          <Users size={16} />
+          <span className="text-[7px] uppercase font-bold">People</span>
         </div>
       </div>
 
