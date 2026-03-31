@@ -17,7 +17,8 @@ import {
   Mic,
   Save,
   X,
-  Phone
+  Phone,
+  MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -26,6 +27,8 @@ export const AshaAppPreview = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  const [pendingRecords, setPendingRecords] = useState(3);
+  const [isOffline, setIsOffline] = useState(true);
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
@@ -34,11 +37,16 @@ export const AshaAppPreview = () => {
   };
 
   const handleSync = () => {
+    if (pendingRecords === 0) {
+      triggerToast('No records to sync');
+      return;
+    }
     setIsSyncing(true);
     setTimeout(() => {
       setIsSyncing(false);
-      triggerToast('Data Synced Successfully');
-    }, 1500);
+      setPendingRecords(0);
+      triggerToast('All records synced to NHM Cloud');
+    }, 2000);
   };
 
   const getHeaderTitle = () => {
@@ -124,7 +132,7 @@ export const AshaAppPreview = () => {
                 <div className="flex items-center gap-2">
                   <RefreshCw size={12} className={`text-accent ${isSyncing ? 'animate-spin' : ''}`} />
                   <span className="text-[9px] text-text font-medium">
-                    {isSyncing ? 'সিঙ্ক হচ্ছে...' : '৩টি রেকর্ড বাকি (3 Pending)'}
+                    {isSyncing ? 'সিঙ্ক হচ্ছে...' : `${pendingRecords}টি রেকর্ড বাকি (${pendingRecords} Pending)`}
                   </span>
                 </div>
                 <button 
@@ -134,6 +142,16 @@ export const AshaAppPreview = () => {
                 >
                   {isSyncing ? '...' : 'Sync'}
                 </button>
+              </div>
+
+              {/* Offline Map Indicator */}
+              <div className="flex items-center gap-2 mb-4 bg-white/5 p-2 rounded-sm border border-border/50">
+                <MapPin size={12} className="text-accent" />
+                <div className="flex-1">
+                  <div className="text-[8px] font-bold text-text uppercase">Offline Map: Majlishpur</div>
+                  <div className="text-[7px] text-muted">Sector 2 cache active (12.4 MB)</div>
+                </div>
+                <div className="text-[6px] bg-accent/20 text-accent px-1 rounded-xs font-bold">CACHED</div>
               </div>
 
               {/* Search */}
@@ -346,6 +364,25 @@ export const AshaAppPreview = () => {
                     </div>
                   ))}
                 </div>
+
+                <div className="text-[8px] text-muted uppercase tracking-widest mt-6 mb-2">System Health (Offline)</div>
+                <div className="bg-[#151515] border border-border p-3 rounded-sm space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] text-muted">Local Database</span>
+                    <span className="text-[9px] text-accent font-bold">ACTIVE (SQLite)</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] text-muted">AI Model Ver.</span>
+                    <span className="text-[9px] text-accent font-bold">v2.4.1 (On-Device)</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] text-muted">Last Full Sync</span>
+                    <span className="text-[9px] text-muted">2 days ago</span>
+                  </div>
+                  <div className="pt-2 border-t border-border/50">
+                    <div className="text-[7px] text-accent/60 font-mono uppercase tracking-tighter">Encrypted with AES-256 · DPDPA Compliant</div>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
@@ -391,12 +428,13 @@ export const AshaAppPreview = () => {
 
               <button 
                 onClick={() => {
-                  triggerToast('Patient Registered Offline');
+                  setPendingRecords(prev => prev + 1);
+                  triggerToast('Record Saved to Local Storage');
                   setScreen('home');
                 }}
                 className="w-full bg-accent text-bg font-bold py-3 rounded-sm text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform"
               >
-                <Save size={14} /> SAVE RECORD
+                <Save size={14} /> SAVE RECORD (OFFLINE)
               </button>
             </motion.div>
           )}
@@ -427,22 +465,25 @@ export const AshaAppPreview = () => {
                 </div>
               </div>
 
-              <div className="bg-accent/5 border border-accent/20 p-3 rounded-sm flex items-center gap-3 cursor-pointer hover:bg-accent/10 transition-colors">
+              <div className="bg-accent/5 border border-accent/20 p-3 rounded-sm flex items-center gap-3 cursor-pointer hover:bg-accent/10 transition-colors relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-accent text-bg text-[5px] px-1 font-black uppercase">Local NLP</div>
                 <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-bg">
                   <Mic size={16} />
                 </div>
                 <div>
                   <div className="text-[10px] font-bold text-text uppercase">Voice Input</div>
-                  <div className="text-[8px] text-muted">Bengali / Kokborok supported</div>
+                  <div className="text-[8px] text-muted">Bengali / Kokborok (Offline)</div>
                 </div>
               </div>
 
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-sm">
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-red-500 text-bg text-[6px] px-1.5 py-0.5 font-black uppercase tracking-tighter">Edge AI Active</div>
                 <div className="flex items-center gap-2 mb-1">
                   <AlertCircle size={12} className="text-red-500" />
                   <span className="text-[9px] font-bold text-red-500 uppercase">AI Risk Score: 84%</span>
                 </div>
                 <p className="text-[8px] text-muted">High probability of TB. Priority referral recommended to AGMC.</p>
+                <div className="mt-2 text-[6px] text-red-500/60 font-mono uppercase tracking-widest">Processed on-device · No network required</div>
               </div>
 
               <button 
