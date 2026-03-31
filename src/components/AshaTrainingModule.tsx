@@ -215,46 +215,80 @@ export const AshaTrainingModule = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+              className="space-y-8"
             >
-              {tutorials.map((tutorial) => (
-                <div 
-                  key={tutorial.id}
-                  className={`bg-card border transition-all cursor-pointer relative overflow-hidden flex flex-col h-full ${activeTutorial === tutorial.id ? 'border-accent ring-1 ring-accent/20' : 'border-border hover:border-accent/30'}`}
-                  onClick={() => setActiveTutorial(activeTutorial === tutorial.id ? null : tutorial.id)}
-                >
-                  <div className="p-5 flex flex-col h-full relative z-10 bg-card">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 rounded-sm bg-accent/5 flex items-center justify-center text-accent">
-                        <BookOpen size={18} />
-                      </div>
-                      <div className="text-[10px] text-muted font-mono bg-bg px-2 py-1 border border-border/10">{tutorial.duration} MINS</div>
+              {/* Progress Indicator */}
+              <div className="bg-surface border border-border p-6 rounded-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="text-[10px] font-bold text-text uppercase tracking-widest">Your Training Progress</div>
+                    <div className="px-2 py-0.5 bg-accent/10 border border-accent/20 text-accent text-[9px] font-bold uppercase tracking-widest rounded-full">
+                      Level 1: Novice
                     </div>
-                    
-                    <h5 className="text-sm font-bold text-text mb-2">{tutorial.title}</h5>
-                    <p className="text-[11px] text-muted leading-relaxed mb-6 flex-grow">{tutorial.description}</p>
-                    
-                    <div className="space-y-2 mb-6">
-                      {tutorial.steps.slice(0, 3).map((step, i) => (
-                        <div key={i} className="flex items-center gap-2 text-[9px] text-text/80">
-                          <CheckCircle2 size={10} className="text-accent/50" />
-                          {step}
-                        </div>
-                      ))}
-                    </div>
-
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedModuleId(tutorial.id);
-                      }}
-                      className="w-full bg-accent/10 border border-accent/20 text-accent font-bold text-[10px] py-2.5 rounded-sm uppercase tracking-widest hover:bg-accent hover:text-bg transition-all"
-                    >
-                      Start Module
-                    </button>
+                  </div>
+                  <div className="text-[10px] text-muted font-mono uppercase tracking-widest">
+                    4 of 12 Modules Completed · <span className="text-accent font-bold">33%</span>
                   </div>
                 </div>
-              ))}
+                <div className="w-full h-2 bg-border rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: '33.33%' }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="h-full bg-accent relative"
+                  >
+                    <div className="absolute top-0 right-0 w-4 h-full bg-white/20 skew-x-[-20deg] animate-pulse" />
+                  </motion.div>
+                </div>
+                <div className="mt-4 flex justify-between items-center">
+                  <p className="text-[10px] text-muted italic">Complete 2 more modules to unlock "Field Agent" status.</p>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-accent" />)}
+                    {[5, 6, 7, 8, 9, 10, 11, 12].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-border" />)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {tutorials.map((tutorial) => (
+                  <div 
+                    key={tutorial.id}
+                    className={`bg-card border transition-all cursor-pointer relative overflow-hidden flex flex-col h-full ${activeTutorial === tutorial.id ? 'border-accent ring-1 ring-accent/20' : 'border-border hover:border-accent/30'}`}
+                    onClick={() => setActiveTutorial(activeTutorial === tutorial.id ? null : tutorial.id)}
+                  >
+                    <div className="p-5 flex flex-col h-full relative z-10 bg-card">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="w-10 h-10 rounded-sm bg-accent/5 flex items-center justify-center text-accent">
+                          <BookOpen size={18} />
+                        </div>
+                        <div className="text-[10px] text-muted font-mono bg-bg px-2 py-1 border border-border/10">{tutorial.duration} MINS</div>
+                      </div>
+                      
+                      <h5 className="text-sm font-bold text-text mb-2">{tutorial.title}</h5>
+                      <p className="text-[11px] text-muted leading-relaxed mb-6 flex-grow">{tutorial.description}</p>
+                      
+                      <div className="space-y-2 mb-6">
+                        {tutorial.steps.slice(0, 3).map((step, i) => (
+                          <div key={i} className="flex items-center gap-2 text-[9px] text-text/80">
+                            <CheckCircle2 size={10} className="text-accent/50" />
+                            {step}
+                          </div>
+                        ))}
+                      </div>
+
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedModuleId(tutorial.id);
+                        }}
+                        className="w-full bg-accent/10 border border-accent/20 text-accent font-bold text-[10px] py-2.5 rounded-sm uppercase tracking-widest hover:bg-accent hover:text-bg transition-all"
+                      >
+                        Start Module
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
               
               <div className="lg:col-span-3 mt-4 p-4 bg-accent/5 border border-accent/20 rounded-sm flex items-center gap-4">
                 <Lightbulb size={18} className="text-accent shrink-0" />
