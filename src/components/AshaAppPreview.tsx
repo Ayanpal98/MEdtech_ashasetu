@@ -18,17 +18,113 @@ import {
   Save,
   X,
   Phone,
-  MapPin
+  MapPin,
+  Cpu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export const AshaAppPreview = () => {
+export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean }) => {
   const [screen, setScreen] = useState('home');
+  const [language, setLanguage] = useState<'bn' | 'kb' | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [pendingRecords, setPendingRecords] = useState(3);
   const [isOffline, setIsOffline] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [symptoms, setSymptoms] = useState<{ cough: boolean | null, fever: boolean | null }>({
+    cough: null,
+    fever: null
+  });
+
+  const translations = {
+    bn: {
+      appName: 'আশা সেতু',
+      home: 'হোম',
+      patients: 'রোগী',
+      alerts: 'সতর্কবার্তা',
+      people: 'সহকর্মী',
+      welcome: 'স্বাগতম',
+      ashaName: 'আশা: অঞ্জলি দেববর্মা',
+      sector: 'ব্লক: মজলিশপুর · সেক্টর ২',
+      syncing: 'সিঙ্ক হচ্ছে...',
+      pending: (n: number) => `${n}টি রেকর্ড বাকি`,
+      localStorage: 'লোকাল স্টোরেজ',
+      edgeAI: 'এজ এআই',
+      recordsUnit: 'রেকর্ড',
+      modelsLoaded: 'মডেল লোড হয়েছে',
+      searchPlaceholder: 'রোগী খুঁজুন',
+      newPatient: 'নতুন রোগী',
+      screening: 'স্ক্রিনিং',
+      recentReferrals: 'সাম্প্রতিক রেফারেল',
+      viewAll: 'সব দেখুন',
+      healthAlert: 'সতর্কতা: ম্যালেরিয়া বেড়েছে',
+      malariaWarning: 'মশারি ব্যবহার নিশ্চিত করুন।',
+      patientRegistration: 'রোগী নিবন্ধন',
+      fullName: 'পুরো নাম',
+      aadhar: 'আধার নম্বর',
+      age: 'বয়স',
+      gender: 'লিঙ্গ',
+      male: 'পুরুষ',
+      female: 'মহিলা',
+      saveRecord: 'রেকর্ড সংরক্ষণ করুন',
+      screeningTitle: 'টিবি/ম্যালেরিয়া স্ক্রিনিং',
+      coughQuestion: 'রোগীর কি দীর্ঘস্থায়ী কাশি রয়েছে (>২ সপ্তাহ)?',
+      feverQuestion: 'কাঁপুনি সহ জ্বরের ইতিহাস আছে কি?',
+      yes: 'হ্যাঁ',
+      no: 'না',
+      voiceInput: 'ভয়েস ইনপুট',
+      riskScore: 'এআই ঝুঁকি স্কোর',
+      generateReferral: 'রেফারেল তৈরি করুন',
+      savedToLocal: 'রেকর্ড লোকাল স্টোরেজে সংরক্ষিত হয়েছে',
+      syncedToCloud: 'সব রেকর্ড এনএইচএম ক্লাউডে সিঙ্ক হয়েছে',
+      noRecords: 'সিঙ্ক করার কোনো রেকর্ড নেই'
+    },
+    kb: {
+      appName: 'ASHASETU',
+      home: 'Home',
+      patients: 'Rogi',
+      alerts: 'Saitwima',
+      people: 'Baksa-rog',
+      welcome: 'Khumulwng',
+      ashaName: 'ASHA: Anjali Debbarma',
+      sector: 'Block: Majlishpur · Sector 2',
+      syncing: 'Sync wungtong...',
+      pending: (n: number) => `${n}thok baki tong`,
+      localStorage: 'Local Storage',
+      edgeAI: 'Edge AI',
+      recordsUnit: 'Records',
+      modelsLoaded: 'Model-rog hapbai',
+      searchPlaceholder: 'Rogi thwiui',
+      newPatient: 'Rogi Kwtal',
+      screening: 'Screening',
+      recentReferrals: 'Recent Referrals',
+      viewAll: 'Bukcha nukhry di',
+      healthAlert: 'Malaria Spike',
+      malariaWarning: 'Mosari kwm di.',
+      patientRegistration: 'Rogi Registration',
+      fullName: 'Mung Gwnang',
+      aadhar: 'Aadhar Number',
+      age: 'Bisi',
+      gender: 'Gender',
+      male: 'Chwla',
+      female: 'Bwkhwi',
+      saveRecord: 'Save Record',
+      screeningTitle: 'TB/Malaria Screening',
+      coughQuestion: 'Saksal tong kha? (>2 weeks)',
+      feverQuestion: 'Bwswm tong kha?',
+      yes: 'Ang',
+      no: 'Maya',
+      voiceInput: 'Voice Input',
+      riskScore: 'AI Risk Score',
+      generateReferral: 'Referral Khunai',
+      savedToLocal: 'Record save wungbai local storage-o',
+      syncedToCloud: 'NHM Cloud-o sync wungbai',
+      noRecords: 'Sync khunai baki kwrwi'
+    }
+  };
+
+  const t = language ? translations[language ] : translations.bn;
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
@@ -38,44 +134,68 @@ export const AshaAppPreview = () => {
 
   const handleSync = () => {
     if (pendingRecords === 0) {
-      triggerToast('No records to sync');
+      triggerToast(t.noRecords);
       return;
     }
     setIsSyncing(true);
     setTimeout(() => {
       setIsSyncing(false);
       setPendingRecords(0);
-      triggerToast('All records synced to NHM Cloud');
+      triggerToast(t.syncedToCloud);
     }, 2000);
+  };
+
+  const handleAnalyze = () => {
+    setIsAnalyzing(true);
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      triggerToast('AI Analysis Complete');
+    }, 2500);
+  };
+
+  const calculateRisk = () => {
+    let score = 0;
+    if (symptoms.cough) score += 42;
+    if (symptoms.fever) score += 42;
+    return score;
   };
 
   const getHeaderTitle = () => {
     switch(screen) {
-      case 'home': return 'MedTech Tripura';
-      case 'new': return 'নতুন রোগী';
-      case 'screening': return 'স্ক্রিনিং';
-      case 'patients': return 'রোগী তালিকা';
-      case 'alerts': return 'সতর্কবার্তা';
-      case 'people': return 'সহকর্মী';
-      default: return 'MedTech';
+      case 'home': return t.appName;
+      case 'new': return t.newPatient;
+      case 'screening': return t.screening;
+      case 'patients': return t.patientList || t.patients;
+      case 'alerts': return t.alerts;
+      case 'people': return t.people;
+      default: return t.appName;
     }
   };
 
   return (
-    <div className="relative w-full max-w-[280px] mx-auto aspect-[9/19] bg-[#0a0a0a] rounded-[32px] border-[6px] border-[#1a1a1a] shadow-2xl overflow-hidden group select-none">
-      {/* Speaker/Camera Notch */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-[#1a1a1a] rounded-b-xl z-30 flex items-center justify-center">
-        <div className="w-8 h-1 bg-[#222] rounded-full" />
-      </div>
+    <div className={`relative bg-[#0a0a0a] overflow-hidden group select-none transition-all duration-500 ${
+      fullScreen 
+        ? 'w-full h-full' 
+        : 'w-full max-w-[280px] mx-auto aspect-[9/19] rounded-[32px] border-[6px] border-[#1a1a1a] shadow-2xl'
+    }`}>
+      {/* Speaker/Camera Notch - Only in phone mode */}
+      {!fullScreen && (
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-[#1a1a1a] rounded-b-xl z-30 flex items-center justify-center">
+          <div className="w-8 h-1 bg-[#222] rounded-full" />
+        </div>
+      )}
 
       {/* Status Bar */}
-      <div className="h-6 bg-accent/10 px-4 flex justify-between items-center text-[8px] font-mono text-accent/80 pt-1 z-20">
+      <div className={`bg-accent/10 flex justify-between items-center font-mono text-accent/80 z-20 ${
+        fullScreen ? 'h-8 px-6 text-[10px]' : 'h-6 px-4 text-[8px] pt-1'
+      }`}>
         <span>10:42 AM</span>
         <div className="flex items-center gap-1">
-          <WifiOff size={8} />
+          <WifiOff size={fullScreen ? 12 : 8} />
           <span>OFFLINE</span>
         </div>
       </div>
+
 
       {/* Toast Notification */}
       <AnimatePresence>
@@ -93,27 +213,64 @@ export const AshaAppPreview = () => {
       </AnimatePresence>
 
       {/* App Header */}
-      <div className="bg-accent p-4 flex justify-between items-center z-20 relative">
-        <div className="flex items-center gap-2">
+      <div className={`bg-accent flex justify-between items-center z-20 relative ${fullScreen ? 'p-6' : 'p-4'}`}>
+        <div className="flex items-center gap-3">
           {screen === 'home' ? (
-            <Menu size={16} className="text-bg cursor-pointer" />
+            <Menu size={fullScreen ? 24 : 16} className="text-bg cursor-pointer" />
           ) : (
-            <ArrowLeft size={16} className="text-bg cursor-pointer" onClick={() => setScreen('home')} />
+            <ArrowLeft size={fullScreen ? 24 : 16} className="text-bg cursor-pointer" onClick={() => setScreen('home')} />
           )}
-          <span className="font-serif font-bold text-bg text-sm">
+          <span className={`font-serif font-bold text-bg ${fullScreen ? 'text-xl' : 'text-sm'}`}>
             {getHeaderTitle()}
           </span>
         </div>
         <div className="relative cursor-pointer" onClick={() => setScreen('alerts')}>
-          <Bell size={16} className="text-bg" />
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-accent" />
+          <Bell size={fullScreen ? 24 : 16} className="text-bg" />
+          <div className={`absolute -top-1 -right-1 bg-red-500 rounded-full border-2 border-accent ${fullScreen ? 'w-3 h-3' : 'w-2 h-2'}`} />
         </div>
       </div>
 
       {/* App Content */}
-      <div className="p-3 overflow-y-auto h-[calc(100%-100px)] custom-scrollbar relative z-10">
+      <div className={`overflow-y-auto custom-scrollbar relative z-10 ${
+        fullScreen ? 'p-10 h-[calc(100%-144px)]' : 'p-3 h-[calc(100%-100px)]'
+      }`}>
         <AnimatePresence mode="wait">
-          {screen === 'home' && (
+          {!language && (
+            <motion.div
+              key="lang-select"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center p-6 text-center"
+            >
+              <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-6">
+                <Activity size={24} className="text-bg" />
+              </div>
+              <h2 className="text-xl font-serif font-bold text-text mb-2">ASHASETU</h2>
+              <p className="text-[10px] text-muted uppercase tracking-widest mb-8">Select Language / ভাষা চয়ন করুন</p>
+              
+              <div className="w-full space-y-3">
+                <button 
+                  onClick={() => setLanguage('bn')}
+                  className="w-full bg-accent/10 border border-accent/20 py-4 rounded-sm text-accent font-bold hover:bg-accent hover:text-bg transition-all"
+                >
+                  বাংলা (BENGALI)
+                </button>
+                <button 
+                  onClick={() => setLanguage('kb')}
+                  className="w-full bg-accent/10 border border-accent/20 py-4 rounded-sm text-accent font-bold hover:bg-accent hover:text-bg transition-all"
+                >
+                  KOKBOROK
+                </button>
+              </div>
+              
+              <div className="mt-12 text-[7px] text-muted uppercase font-mono tracking-tighter">
+                Frontline Health Infrastructure · Tripura
+              </div>
+            </motion.div>
+          )}
+
+          {screen === 'home' && language && (
             <motion.div
               key="home"
               initial={{ x: -20, opacity: 0 }}
@@ -121,10 +278,10 @@ export const AshaAppPreview = () => {
               exit={{ x: 20, opacity: 0 }}
             >
               {/* Welcome Section */}
-              <div className="mb-4">
-                <div className="text-[10px] text-muted uppercase tracking-widest mb-1">স্বাগতম (Welcome)</div>
-                <div className="text-text font-serif font-bold">ASHA: Anjali Debbarma</div>
-                <div className="text-[9px] text-accent font-mono mt-1">Block: Majlishpur · Sector 2</div>
+              <div className="mb-8">
+                <div className={`${fullScreen ? 'text-sm' : 'text-[10px]'} text-muted uppercase tracking-widest mb-2`}>{t.welcome}</div>
+                <div className={`${fullScreen ? 'text-4xl' : 'text-text'} font-serif font-bold`}>{t.ashaName}</div>
+                <div className={`${fullScreen ? 'text-base' : 'text-[9px]'} text-accent font-mono mt-2`}>{t.sector}</div>
               </div>
 
               {/* Sync Banner */}
@@ -132,7 +289,7 @@ export const AshaAppPreview = () => {
                 <div className="flex items-center gap-2">
                   <RefreshCw size={12} className={`text-accent ${isSyncing ? 'animate-spin' : ''}`} />
                   <span className="text-[9px] text-text font-medium">
-                    {isSyncing ? 'সিঙ্ক হচ্ছে...' : `${pendingRecords}টি রেকর্ড বাকি (${pendingRecords} Pending)`}
+                    {isSyncing ? t.syncing : t.pending(pendingRecords)}
                   </span>
                 </div>
                 <button 
@@ -142,6 +299,18 @@ export const AshaAppPreview = () => {
                 >
                   {isSyncing ? '...' : 'Sync'}
                 </button>
+              </div>
+
+              {/* Local Storage & AI Status */}
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <div className="bg-white/5 border border-border/50 p-2 rounded-sm">
+                  <div className="text-[7px] text-muted uppercase tracking-wider">{t.localStorage}</div>
+                  <div className="text-[9px] font-bold text-accent">{`142 ${t.recordsUnit}`} (SQLite)</div>
+                </div>
+                <div className="bg-white/5 border border-border/50 p-2 rounded-sm">
+                  <div className="text-[7px] text-muted uppercase tracking-wider">{t.edgeAI}</div>
+                  <div className="text-[9px] font-bold text-accent">{t.modelsLoaded}</div>
+                </div>
               </div>
 
               {/* Offline Map Indicator */}
@@ -159,7 +328,7 @@ export const AshaAppPreview = () => {
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted" size={12} />
                 <input 
                   type="text" 
-                  placeholder="রোগী খুঁজুন (Search Patient)" 
+                  placeholder={t.searchPlaceholder} 
                   className="w-full bg-[#151515] border border-border rounded-sm py-1.5 pl-8 pr-2 text-[10px] text-text outline-none focus:border-accent/50"
                   readOnly
                   onClick={() => setScreen('patients')}
@@ -173,22 +342,22 @@ export const AshaAppPreview = () => {
                   className="bg-accent/10 border border-accent/20 p-3 rounded-sm flex flex-col items-center gap-2 hover:bg-accent/20 transition-colors active:scale-95"
                 >
                   <Plus size={16} className="text-accent" />
-                  <span className="text-[9px] font-bold text-text text-center leading-tight">নতুন রোগী<br/>(New Patient)</span>
+                  <span className="text-[9px] font-bold text-text text-center leading-tight">{t.newPatient}</span>
                 </button>
                 <button 
                   onClick={() => setScreen('screening')}
                   className="bg-accent/10 border border-accent/20 p-3 rounded-sm flex flex-col items-center gap-2 hover:bg-accent/20 transition-colors active:scale-95"
                 >
                   <Activity size={16} className="text-accent" />
-                  <span className="text-[9px] font-bold text-text text-center leading-tight">স্ক্রিনিং<br/>(Screening)</span>
+                  <span className="text-[9px] font-bold text-text text-center leading-tight">{t.screening}</span>
                 </button>
               </div>
 
               {/* Recent Referrals */}
               <div className="mb-4">
                 <div className="text-[9px] text-muted uppercase tracking-widest mb-2 flex justify-between">
-                  <span>সাম্প্রতিক রেফারেল (Recent)</span>
-                  <span className="text-accent cursor-pointer">View All</span>
+                  <span>{t.recentReferrals}</span>
+                  <span className="text-accent cursor-pointer">{t.viewAll}</span>
                 </div>
                 <div className="space-y-2">
                   {[
@@ -218,14 +387,14 @@ export const AshaAppPreview = () => {
               <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-sm cursor-pointer" onClick={() => setScreen('alerts')}>
                 <div className="flex items-center gap-2 mb-1">
                   <AlertCircle size={10} className="text-red-500" />
-                  <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Alert: Malaria Spike</span>
+                  <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider">{t.healthAlert}</span>
                 </div>
-                <p className="text-[8px] text-muted leading-tight">আপনার এলাকায় ম্যালেরিয়া বাড়ছে। মশারি ব্যবহার নিশ্চিত করুন। (Increase in cases in your sector.)</p>
+                <p className="text-[8px] text-muted leading-tight">{t.malariaWarning}</p>
               </div>
             </motion.div>
           )}
 
-          {screen === 'patients' && (
+          {screen === 'patients' && language && (
             <motion.div
               key="patients"
               initial={{ x: 20, opacity: 0 }}
@@ -234,7 +403,7 @@ export const AshaAppPreview = () => {
               className="space-y-4"
             >
               <div className="flex justify-between items-center">
-                <div className="text-[10px] text-muted uppercase tracking-widest">Patient List</div>
+                <div className="text-[10px] text-muted uppercase tracking-widest">{t.patients}</div>
                 <div className="text-[8px] text-accent font-bold">Total: 142</div>
               </div>
               
@@ -242,7 +411,7 @@ export const AshaAppPreview = () => {
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted" size={10} />
                 <input 
                   type="text" 
-                  placeholder="খুঁজুন (Search)" 
+                  placeholder={t.searchPlaceholder} 
                   className="w-full bg-[#151515] border border-border rounded-sm py-1 pl-7 pr-2 text-[9px] text-text outline-none"
                 />
               </div>
@@ -275,7 +444,7 @@ export const AshaAppPreview = () => {
             </motion.div>
           )}
 
-          {screen === 'alerts' && (
+          {screen === 'alerts' && language && (
             <motion.div
               key="alerts"
               initial={{ x: 20, opacity: 0 }}
@@ -283,7 +452,7 @@ export const AshaAppPreview = () => {
               exit={{ x: -20, opacity: 0 }}
               className="space-y-4"
             >
-              <div className="text-[10px] text-muted uppercase tracking-widest">Health Alerts</div>
+              <div className="text-[10px] text-muted uppercase tracking-widest">{t.alerts}</div>
               
               <div className="space-y-3">
                 <div className="bg-red-500/5 border border-red-500/20 p-3 rounded-sm">
@@ -316,7 +485,7 @@ export const AshaAppPreview = () => {
             </motion.div>
           )}
 
-          {screen === 'people' && (
+          {screen === 'people' && language && (
             <motion.div
               key="people"
               initial={{ x: 20, opacity: 0 }}
@@ -324,9 +493,27 @@ export const AshaAppPreview = () => {
               exit={{ x: -20, opacity: 0 }}
               className="space-y-4"
             >
-              <div className="text-[10px] text-muted uppercase tracking-widest">Sector Team</div>
+              <div className="text-[10px] text-muted uppercase tracking-widest">{t.people}</div>
               
               <div className="space-y-3">
+                {/* Language Selection Action */}
+                <div className="bg-[#151515] border border-border p-3 rounded-sm mb-4">
+                  <div className="text-[8px] text-muted uppercase mb-3 tracking-widest">Language / ভাষা</div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setLanguage('bn')}
+                      className={`flex-1 py-1.5 rounded-xs text-[9px] font-bold transition-all ${language === 'bn' ? 'bg-accent text-bg shadow-lg shadow-accent/20' : 'bg-white/5 text-muted'}`}
+                    >
+                      বাংলা
+                    </button>
+                    <button 
+                      onClick={() => setLanguage('kb')}
+                      className={`flex-1 py-1.5 rounded-xs text-[9px] font-bold transition-all ${language === 'kb' ? 'bg-accent text-bg shadow-lg shadow-accent/20' : 'bg-white/5 text-muted'}`}
+                    >
+                      KOKBOROK
+                    </button>
+                  </div>
+                </div>
                 <div className="bg-[#151515] border border-border p-3 rounded-sm">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
@@ -376,8 +563,12 @@ export const AshaAppPreview = () => {
                     <span className="text-[9px] text-accent font-bold">v2.4.1 (On-Device)</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] text-muted">Last Full Sync</span>
-                    <span className="text-[9px] text-muted">2 days ago</span>
+                    <span className="text-[9px] text-muted">Storage Used</span>
+                    <span className="text-[9px] text-text font-bold">142.8 MB / 2.0 GB</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] text-muted">Offline Map</span>
+                    <span className="text-[9px] text-accent font-bold">Majlishpur (Sector 2)</span>
                   </div>
                   <div className="pt-2 border-t border-border/50">
                     <div className="text-[7px] text-accent/60 font-mono uppercase tracking-tighter">Encrypted with AES-256 · DPDPA Compliant</div>
@@ -387,7 +578,7 @@ export const AshaAppPreview = () => {
             </motion.div>
           )}
 
-          {screen === 'new' && (
+          {screen === 'new' && language && (
             <motion.div
               key="new"
               initial={{ x: 20, opacity: 0 }}
@@ -395,31 +586,31 @@ export const AshaAppPreview = () => {
               exit={{ x: -20, opacity: 0 }}
               className="space-y-4"
             >
-              <div className="text-[10px] text-muted uppercase tracking-widest">Patient Registration</div>
+              <div className="text-[10px] text-muted uppercase tracking-widest">{t.patientRegistration}</div>
               
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-[8px] text-muted uppercase">Full Name (নাম)</label>
-                  <input type="text" className="w-full bg-[#151515] border border-border rounded-sm p-2 text-[10px] text-text" placeholder="Enter name" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-muted uppercase">Aadhar Number</label>
-                  <input type="text" className="w-full bg-[#151515] border border-border rounded-sm p-2 text-[10px] text-text" placeholder="XXXX XXXX XXXX" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[8px] text-muted uppercase">Age</label>
-                    <input type="number" className="w-full bg-[#151515] border border-border rounded-sm p-2 text-[10px] text-text" />
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className={`${fullScreen ? 'text-xs' : 'text-[8px]'} text-muted uppercase`}>{t.fullName}</label>
+                    <input type="text" className={`w-full bg-[#151515] border border-border rounded-sm text-text ${fullScreen ? 'p-4 text-base' : 'p-2 text-[10px]'}`} placeholder="..." />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[8px] text-muted uppercase">Gender</label>
-                    <select className="w-full bg-[#151515] border border-border rounded-sm p-2 text-[10px] text-text">
-                      <option>Male</option>
-                      <option>Female</option>
-                    </select>
+                  <div className="space-y-2">
+                    <label className={`${fullScreen ? 'text-xs' : 'text-[8px]'} text-muted uppercase`}>{t.aadhar}</label>
+                    <input type="text" className={`w-full bg-[#151515] border border-border rounded-sm text-text ${fullScreen ? 'p-4 text-base' : 'p-2 text-[10px]'}`} placeholder="XXXX XXXX XXXX" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className={`${fullScreen ? 'text-xs' : 'text-[8px]'} text-muted uppercase`}>{t.age}</label>
+                      <input type="number" className={`w-full bg-[#151515] border border-border rounded-sm text-text ${fullScreen ? 'p-4 text-base' : 'p-2 text-[10px]'}`} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className={`${fullScreen ? 'text-xs' : 'text-[8px]'} text-muted uppercase`}>{t.gender}</label>
+                      <select className={`w-full bg-[#151515] border border-border rounded-sm text-text focus:outline-none ${fullScreen ? 'p-4 text-base' : 'p-2 text-[10px]'}`}>
+                        <option>{t.male}</option>
+                        <option>{t.female}</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
-              </div>
 
               <div className="bg-accent/5 border border-dashed border-accent/30 p-4 rounded-sm flex flex-col items-center gap-2 cursor-pointer hover:bg-accent/10 transition-colors">
                 <Camera size={20} className="text-accent" />
@@ -429,17 +620,17 @@ export const AshaAppPreview = () => {
               <button 
                 onClick={() => {
                   setPendingRecords(prev => prev + 1);
-                  triggerToast('Record Saved to Local Storage');
+                  triggerToast(t.savedToLocal);
                   setScreen('home');
                 }}
                 className="w-full bg-accent text-bg font-bold py-3 rounded-sm text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform"
               >
-                <Save size={14} /> SAVE RECORD (OFFLINE)
+                <Save size={14} /> {t.saveRecord}
               </button>
             </motion.div>
           )}
 
-          {screen === 'screening' && (
+          {screen === 'screening' && language && (
             <motion.div
               key="screening"
               initial={{ x: 20, opacity: 0 }}
@@ -447,53 +638,111 @@ export const AshaAppPreview = () => {
               exit={{ x: -20, opacity: 0 }}
               className="space-y-4"
             >
-              <div className="text-[10px] text-muted uppercase tracking-widest">TB/Malaria Screening</div>
+              <div className="text-[10px] text-muted uppercase tracking-widest">{t.screeningTitle}</div>
               
               <div className="bg-[#151515] border border-border p-3 rounded-sm">
-                <p className="text-[10px] text-text mb-3">Does the patient have a persistent cough (&gt;2 weeks)?</p>
+                <p className="text-[10px] text-text mb-3">{t.coughQuestion}</p>
                 <div className="flex gap-2">
-                  <button className="flex-1 bg-accent/10 border border-accent/20 py-2 rounded-sm text-[10px] font-bold text-accent">YES</button>
-                  <button className="flex-1 bg-white/5 border border-border py-2 rounded-sm text-[10px] font-bold text-muted">NO</button>
+                  <button 
+                    onClick={() => setSymptoms(prev => ({ ...prev, cough: true }))}
+                    className={`flex-1 border py-2 rounded-sm text-[10px] font-bold transition-all ${symptoms.cough === true ? 'bg-accent border-accent text-bg' : 'bg-accent/10 border-accent/20 text-accent'}`}
+                  >
+                    {t.yes}
+                  </button>
+                  <button 
+                    onClick={() => setSymptoms(prev => ({ ...prev, cough: false }))}
+                    className={`flex-1 border py-2 rounded-sm text-[10px] font-bold transition-all ${symptoms.cough === false ? 'bg-white/10 border-white/20 text-text' : 'bg-white/5 border-border text-muted'}`}
+                  >
+                    {t.no}
+                  </button>
                 </div>
               </div>
 
               <div className="bg-[#151515] border border-border p-3 rounded-sm">
-                <p className="text-[10px] text-text mb-3">Is there a history of high fever with chills?</p>
+                <p className="text-[10px] text-text mb-3">{t.feverQuestion}</p>
                 <div className="flex gap-2">
-                  <button className="flex-1 bg-accent/10 border border-accent/20 py-2 rounded-sm text-[10px] font-bold text-accent">YES</button>
-                  <button className="flex-1 bg-white/5 border border-border py-2 rounded-sm text-[10px] font-bold text-muted">NO</button>
+                  <button 
+                    onClick={() => setSymptoms(prev => ({ ...prev, fever: true }))}
+                    className={`flex-1 border py-2 rounded-sm text-[10px] font-bold transition-all ${symptoms.fever === true ? 'bg-accent border-accent text-bg' : 'bg-accent/10 border-accent/20 text-accent'}`}
+                  >
+                    {t.yes}
+                  </button>
+                  <button 
+                    onClick={() => setSymptoms(prev => ({ ...prev, fever: false }))}
+                    className={`flex-1 border py-2 rounded-sm text-[10px] font-bold transition-all ${symptoms.fever === false ? 'bg-white/10 border-white/20 text-text' : 'bg-white/5 border-border text-muted'}`}
+                  >
+                    {t.no}
+                  </button>
                 </div>
               </div>
 
-              <div className="bg-accent/5 border border-accent/20 p-3 rounded-sm flex items-center gap-3 cursor-pointer hover:bg-accent/10 transition-colors relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-accent text-bg text-[5px] px-1 font-black uppercase">Local NLP</div>
-                <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-bg">
-                  <Mic size={16} />
+              <div className={`p-4 bg-[#151515] border border-border rounded-sm relative overflow-hidden ${fullScreen ? 'mb-8' : 'mb-4'}`}>
+                {isAnalyzing && (
+                  <motion.div 
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 2.5, ease: "linear" }}
+                    className="absolute top-0 left-0 right-0 h-1 bg-accent origin-left z-20"
+                  />
+                )}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Activity size={fullScreen ? 18 : 12} className={isAnalyzing ? "text-accent animate-pulse" : "text-muted"} />
+                    <span className={`${fullScreen ? 'text-xs' : 'text-[9px]'} font-bold text-muted uppercase`}>Edge AI Status</span>
+                  </div>
+                  {isAnalyzing && <span className={`${fullScreen ? 'text-sm' : 'text-[7px]'} text-accent font-mono animate-pulse uppercase`}>Analyzing Data...</span>}
                 </div>
-                <div>
-                  <div className="text-[10px] font-bold text-text uppercase">Voice Input</div>
-                  <div className="text-[8px] text-muted">Bengali / Kokborok (Offline)</div>
+                
+                <div className="space-y-3 pt-1">
+                  <div className="flex justify-between items-center">
+                    <span className={`${fullScreen ? 'text-base' : 'text-[10px]'} text-text`}>{t.riskScore}</span>
+                    <span className={`font-black ${fullScreen ? 'text-2xl' : 'text-[11px]'} ${calculateRisk() > 60 ? 'text-red-500' : calculateRisk() > 0 ? 'text-yellow-500' : 'text-accent'}`}>
+                      {isAnalyzing ? '--%' : `${calculateRisk()}%`}
+                    </span>
+                  </div>
+                  <div className={`bg-white/5 rounded-full overflow-hidden ${fullScreen ? 'h-3' : 'h-1'}`}>
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: isAnalyzing ? 0 : `${calculateRisk()}%` }}
+                      className={`h-full transition-all duration-1000 ${calculateRisk() > 60 ? 'bg-red-500' : 'bg-accent'}`}
+                    />
+                  </div>
+                </div>
+                <div className={`mt-3 font-mono uppercase tracking-widest text-center text-muted ${fullScreen ? 'text-[10px]' : 'text-[6px]'}`}>
+                  Local Inference (No cloud processing required)
                 </div>
               </div>
 
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-red-500 text-bg text-[6px] px-1.5 py-0.5 font-black uppercase tracking-tighter">Edge AI Active</div>
-                <div className="flex items-center gap-2 mb-1">
-                  <AlertCircle size={12} className="text-red-500" />
-                  <span className="text-[9px] font-bold text-red-500 uppercase">AI Risk Score: 84%</span>
-                </div>
-                <p className="text-[8px] text-muted">High probability of TB. Priority referral recommended to AGMC.</p>
-                <div className="mt-2 text-[6px] text-red-500/60 font-mono uppercase tracking-widest">Processed on-device · No network required</div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing || symptoms.cough === null || symptoms.fever === null}
+                  className="flex-[2] bg-accent/20 border border-accent/40 text-accent font-bold py-3 rounded-sm text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-30"
+                >
+                  <Cpu size={14} className={isAnalyzing ? "animate-spin" : ""} /> 
+                  {isAnalyzing ? 'Processing...' : 'Run Edge AI Analysis'}
+                </button>
+                <button 
+                   onClick={() => {
+                    setScreen('home');
+                    setSymptoms({ cough: null, fever: null });
+                  }}
+                  className="flex-1 bg-white/5 border border-border text-muted font-bold py-3 rounded-sm text-[10px] active:scale-95"
+                >
+                  Reset
+                </button>
               </div>
 
               <button 
                 onClick={() => {
                   triggerToast('Referral Generated');
                   setScreen('home');
+                  setSymptoms({ cough: null, fever: null });
                 }}
-                className="w-full bg-accent text-bg font-bold py-3 rounded-sm text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                disabled={isAnalyzing || calculateRisk() === 0}
+                className="w-full bg-accent text-bg font-bold py-3 rounded-sm text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform uppercase disabled:opacity-50"
               >
-                GENERATE REFERRAL
+                {t.generateReferral}
               </button>
             </motion.div>
           )}
@@ -501,34 +750,36 @@ export const AshaAppPreview = () => {
       </div>
 
       {/* Navigation Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 bg-[#151515] border-t border-border flex justify-around items-center px-4 z-20">
+      <div className={`absolute bottom-0 left-0 right-0 bg-[#151515] border-t border-border flex justify-around items-center z-20 ${
+        fullScreen ? 'h-20 px-10' : 'h-12 px-4'
+      }`}>
         <div 
           onClick={() => setScreen('home')}
-          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${screen === 'home' ? 'text-accent' : 'text-muted'}`}
+          className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${screen === 'home' ? 'text-accent' : 'text-muted'}`}
         >
-          <Activity size={16} />
-          <span className="text-[7px] uppercase font-bold">Home</span>
+          <Activity size={fullScreen ? 24 : 16} />
+          <span className={`${fullScreen ? 'text-[10px]' : 'text-[7px]'} uppercase font-bold`}>{t.home}</span>
         </div>
         <div 
           onClick={() => setScreen('patients')}
-          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${screen === 'patients' ? 'text-accent' : 'text-muted'}`}
+          className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${screen === 'patients' ? 'text-accent' : 'text-muted'}`}
         >
-          <Users size={16} />
-          <span className="text-[7px] uppercase font-bold">Patients</span>
+          <Users size={fullScreen ? 24 : 16} />
+          <span className={`${fullScreen ? 'text-[10px]' : 'text-[7px]'} uppercase font-bold`}>{t.patients}</span>
         </div>
         <div 
           onClick={() => setScreen('alerts')}
-          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${screen === 'alerts' ? 'text-accent' : 'text-muted'}`}
+          className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${screen === 'alerts' ? 'text-accent' : 'text-muted'}`}
         >
-          <Bell size={16} />
-          <span className="text-[7px] uppercase font-bold">Alerts</span>
+          <Bell size={fullScreen ? 24 : 16} />
+          <span className={`${fullScreen ? 'text-[10px]' : 'text-[7px]'} uppercase font-bold`}>{t.alerts}</span>
         </div>
         <div 
           onClick={() => setScreen('people')}
-          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${screen === 'people' ? 'text-accent' : 'text-muted'}`}
+          className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${screen === 'people' ? 'text-accent' : 'text-muted'}`}
         >
-          <Users size={16} />
-          <span className="text-[7px] uppercase font-bold">People</span>
+          <User size={fullScreen ? 24 : 16} />
+          <span className={`${fullScreen ? 'text-[10px]' : 'text-[7px]'} uppercase font-bold`}>{t.people}</span>
         </div>
       </div>
 

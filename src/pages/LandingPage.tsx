@@ -1,0 +1,509 @@
+import React, { useEffect, useState } from 'react';
+import { motion, useScroll, useSpring, AnimatePresence } from 'motion/react';
+import { 
+  Activity, 
+  BadgeCheck, 
+  Brain, 
+  Building2, 
+  ChevronRight, 
+  Globe, 
+  Mail, 
+  MapPin, 
+  Menu, 
+  Phone, 
+  ShieldCheck, 
+  TrendingUp, 
+  Users, 
+  Linkedin,
+  Share2,
+  Check,
+  ExternalLink,
+  Lock,
+  X 
+} from 'lucide-react';
+import { ParticleCanvas } from '../components/ParticleCanvas';
+import { DelayReductionChart } from '../components/DelayReductionChart';
+import { AshaAppPreview } from '../components/AshaAppPreview';
+import { AshaTrainingModule } from '../components/AshaTrainingModule';
+import { StartupDetails } from '../components/StartupDetails';
+import { ContactForm } from '../components/ContactForm';
+import { Link } from 'react-router-dom';
+
+const SectionLabel = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+  <div className={`font-mono text-[11px] tracking-[0.2em] text-accent uppercase mb-4 ${className}`}>
+    {children}
+  </div>
+);
+
+const SectionTitle = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+  <h2 className={`font-serif text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] mb-5 ${className}`}>
+    {children}
+  </h2>
+);
+
+const Reveal: React.FC<{ children: React.ReactNode, className?: string, delay?: number, id?: string }> = ({ children, className = "", delay = 0, id }) => (
+  <motion.div
+    id={id}
+    initial={{ opacity: 0, y: 32 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-100px" }}
+    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay }}
+    className={className}
+  >
+    {children}
+  </motion.div>
+);
+
+export const LandingPage = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1400);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const navLinks = [
+    { name: 'ASHASETU', href: '#ashasetu' },
+    { name: 'Landscape', href: '#landscape' },
+    { name: 'Opportunities', href: '#opportunities' },
+    { name: 'Infrastructure', href: '#problems' },
+    { name: 'Disease Burden', href: '#diseases' },
+    { name: 'Roadmap', href: '#roadmap' },
+    { name: 'Financials', href: '#financials' },
+    { name: 'Funding', href: '#funding' },
+  ];
+
+  return (
+    <div className="relative min-h-screen overflow-x-hidden">
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 bg-bg z-[9999] flex flex-col items-center justify-center gap-6"
+          >
+            <div className="font-mono text-[13px] tracking-[0.2em] text-accent">MEDTECH TRIPURA</div>
+            <div className="w-[200px] h-[2px] bg-accent/15 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
+                className="h-full bg-linear-to-r from-accent to-accent-light"
+              />
+            </div>
+            <div className="text-[12px] text-muted tracking-[0.1em]">A VENTURE UNDER ATSFY TECHNOLOGIES</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="noise-overlay" />
+      
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[3px] bg-linear-to-r from-accent to-accent-light z-[200] origin-left shadow-[0_0_12px_rgba(61,220,132,0.6)]"
+        style={{ scaleX }}
+      />
+
+      {/* Navigation */}
+      <nav className={`fixed top-0 left-0 right-0 z-100 transition-all duration-300 ${isScrolled ? 'bg-bg/95 backdrop-blur-md border-b border-border py-3' : 'bg-transparent py-5'}`}>
+        <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
+          <a href="#" className="flex items-center gap-2 group">
+            <span className="font-mono text-sm md:text-base font-bold text-text tracking-tighter">
+              MedTech<span className="text-accent">Tripura</span>
+            </span>
+            <span className="hidden sm:inline-block text-[10px] text-muted font-normal tracking-wide ml-1">
+              by ATSFY Technologies
+            </span>
+          </a>
+
+          <div className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                className="text-[12px] font-medium text-muted hover:text-text hover:bg-white/5 px-3 py-2 rounded-sm transition-colors"
+              >
+                {link.name}
+              </a>
+            ))}
+            <a
+              href="#contacts"
+              className="text-[12px] font-medium bg-accent/10 border border-accent/25 text-accent hover:bg-accent/20 px-4 py-2 rounded-sm transition-all ml-2"
+            >
+              Key Contacts
+            </a>
+          </div>
+
+          <button
+            className="lg:hidden p-2 text-text"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="lg:hidden absolute top-full left-0 right-0 bg-bg/98 backdrop-blur-xl border-b border-border p-6 flex flex-col gap-4"
+            >
+              {navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="text-lg font-medium text-muted hover:text-accent transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.name}
+                </a>
+              ))}
+              <a
+                href="#contacts"
+                className="text-lg font-medium text-accent bg-accent/10 p-4 rounded-sm text-center"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Key Contacts
+              </a>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+
+      {/* Hero Section */}
+      <section id="hero" className="relative min-h-screen pt-[60px] flex flex-col lg:flex-row overflow-hidden">
+        <ParticleCanvas />
+        <div className="orb w-[400px] h-[400px] bg-radial-[circle] from-accent/12 to-transparent top-[-100px] right-[-80px] animate-[orb-float_10s_ease-in-out_infinite]" />
+        <div className="orb w-[300px] h-[300px] bg-radial-[circle] from-accent-light/8 to-transparent bottom-[50px] left-[-60px] animate-[orb-float_13s_ease-in-out_infinite_delay-[-4s]]" />
+        
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(61,220,132,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(61,220,132,0.04)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none" />
+
+        <div className="flex-1 flex flex-col justify-center px-6 md:px-10 lg:pl-20 py-20 relative z-10">
+          <Reveal delay={0.3}>
+            <div className="inline-flex items-center gap-2 bg-accent/10 border border-border text-accent font-mono text-[11px] tracking-[0.15em] px-3 py-1.5 rounded-sm mb-9">
+              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+              MARCH 2026 · A VENTURE UNDER ATSFY TECHNOLOGIES
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.5}>
+            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-black leading-[1.05] tracking-tight mb-6">
+              MedTech<br />
+              <em className="text-gradient not-italic">Opportunity</em><br />
+              in Tripura
+            </h1>
+          </Reveal>
+
+          <Reveal delay={0.7}>
+            <p className="text-muted text-lg md:text-xl max-w-lg mb-12 leading-relaxed">
+              Four high-impact, commercially sustainable healthcare technology interventions for Northeast India — where zero MedTech startups currently operate, and where 4,000+ frontline health workers have no digital tools.
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.9} className="flex flex-wrap gap-4">
+            <Link to="/ashasetu" className="bg-accent text-bg font-bold text-sm px-8 py-4 rounded-sm hover:bg-accent-light hover:-translate-y-0.5 transition-all shadow-lg shadow-accent/20">
+              See ASHASETU Dedicated Page
+            </Link>
+            <a href="#opportunities" className="bg-transparent border border-white/15 text-text font-medium text-sm px-8 py-4 rounded-sm hover:border-accent hover:text-accent transition-all flex items-center gap-2">
+              Market Opportunities <ChevronRight size={16} />
+            </a>
+          </Reveal>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-6 md:p-10 relative z-10">
+          <div className="grid grid-cols-2 gap-0.5 w-full max-w-md">
+            {[
+              { num: '4,000+', label: 'ASHA workers in Tripura without digital tools' },
+              { num: '39%', label: 'of Primary Health Centres lack lab technicians' },
+              { num: '0', label: 'MedTech startups currently operating in NE India' },
+              { num: '8', label: 'Northeast states sharing the same structural healthcare gap' }
+            ].map((stat, i) => (
+              <Reveal key={i} delay={1 + i * 0.1} className="bg-card border border-border p-7 relative overflow-hidden group hover:border-accent/40 transition-colors">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-accent to-transparent" />
+                <div className="text-3xl md:text-4xl font-serif font-black text-accent mb-2">{stat.num}</div>
+                <div className="text-[11px] text-muted leading-tight uppercase tracking-wider">{stat.label}</div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Thesis Section */}
+      <section className="bg-linear-to-br from-card to-[#0d1a10] border-y border-border py-16 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 flex flex-col md:flex-row items-center gap-10 md:gap-20">
+          <div className="font-mono text-[10px] tracking-[0.2em] text-gold uppercase md:rotate-180 md:[writing-mode:vertical-rl]">
+            Key Thesis
+          </div>
+          <p className="font-serif text-xl md:text-3xl leading-relaxed italic text-text">
+            "The most solvable MedTech problem in Tripura is not a technology problem — it is a <strong className="text-accent not-italic relative inline-block after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-accent">distribution and design problem</strong>. The ASHA worker network already exists, government funding already flows, and the disease burden is documented. What is missing is a <strong className="text-accent not-italic">software layer</strong> built for offline-first, vernacular-first, low-cost-device environments."
+          </p>
+        </div>
+      </section>
+
+      {/* Tripura Healthcare Landscape */}
+      <section id="landscape" className="py-24 relative z-10 bg-bg">
+        <div className="max-w-7xl mx-auto px-6 md:px-10">
+          <SectionLabel>02 · Tripura Healthcare Landscape</SectionLabel>
+          <SectionTitle>The Data Behind<br />the Opportunity</SectionTitle>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-16">
+            <Reveal className="lg:col-span-2" delay={0.2}>
+              <div className="bg-card border border-border p-8 md:p-12 h-full">
+                <h3 className="text-2xl font-serif font-bold mb-8">Infrastructure & Workforce</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-4xl font-mono font-black text-accent">4,000+</span>
+                        <span className="text-muted text-xs uppercase tracking-widest">ASHA Workers</span>
+                      </div>
+                      <p className="text-muted text-xs mt-2 leading-relaxed">Frontline health activists serving as the backbone of rural healthcare delivery. Currently operating with zero digital tools.</p>
+                      <div className="text-[9px] text-muted/50 mt-1 uppercase tracking-tighter italic">Source: NHM Tripura, 2024</div>
+                    </div>
+                    <div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-4xl font-mono font-black text-accent">118</span>
+                        <span className="text-muted text-xs uppercase tracking-widest">PHCs</span>
+                      </div>
+                      <p className="text-muted text-xs mt-2 leading-relaxed">Primary Health Centres across 8 districts. 39% currently lack lab technicians for critical screening.</p>
+                      <div className="text-[9px] text-muted/50 mt-1 uppercase tracking-tighter italic">Source: NITI Aayog Health Index</div>
+                    </div>
+                  </div>
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-4xl font-mono font-black text-accent">1,000+</span>
+                        <span className="text-muted text-xs uppercase tracking-widest">Sub-Centres</span>
+                      </div>
+                      <p className="text-muted text-xs mt-2 leading-relaxed">The first point of contact for rural patients. Often located in areas with intermittent connectivity.</p>
+                      <div className="text-[9px] text-muted/50 mt-1 uppercase tracking-tighter italic">Source: NHM Tripura Annual Report</div>
+                    </div>
+                    <div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-4xl font-mono font-black text-accent">1:1,800</span>
+                        <span className="text-muted text-xs uppercase tracking-widest">Doctor Ratio</span>
+                      </div>
+                      <p className="text-muted text-xs mt-2 leading-relaxed">Significantly higher than the WHO recommended 1:1,000 ratio, placing extreme burden on primary care.</p>
+                      <div className="text-[9px] text-muted/50 mt-1 uppercase tracking-tighter italic">Source: Tripura Health Services Statistics</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.4}>
+              <div className="bg-accent/5 border border-accent/20 p-8 md:p-12 h-full flex flex-col justify-between">
+                <div>
+                  <h3 className="text-2xl font-serif font-bold mb-6">Critical Indicators</h3>
+                  <div className="space-y-8">
+                    <div>
+                      <div className="text-3xl font-mono font-black text-accent">37.6</div>
+                      <div className="text-muted text-xs uppercase tracking-widest mt-1">Infant Mortality Rate (IMR)</div>
+                      <p className="text-muted text-[11px] mt-2 leading-relaxed">Per 1,000 live births. Higher than the national average in specific rural pockets of Dhalai and Khowai.</p>
+                      <div className="text-[9px] text-muted/50 mt-1 uppercase tracking-tighter italic">Source: NFHS-5 (2019-21)</div>
+                    </div>
+                    <div>
+                      <div className="text-3xl font-mono font-black text-accent">High</div>
+                      <div className="text-muted text-xs uppercase tracking-widest mt-1">Disease Burden</div>
+                      <p className="text-muted text-[11px] mt-2 leading-relaxed">Tripura reports some of the highest Malaria and TB incidence rates in Northeast India per capita.</p>
+                      <div className="text-[9px] text-muted/50 mt-1 uppercase tracking-tighter italic">Source: NVBDCP Data</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-8 mt-8 border-t border-accent/10">
+                  <a href="https://tripuranrhm.gov.in/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] font-mono text-accent hover:underline uppercase tracking-widest">
+                    Official NHM Portal <ExternalLink size={12} />
+                  </a>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Opportunities Section */}
+      <section id="opportunities" className="py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 md:px-10">
+          <SectionLabel>03 · Strategic Opportunities</SectionLabel>
+          <SectionTitle>Four High-Impact<br />Market Openings</SectionTitle>
+          <p className="text-muted text-lg max-w-2xl mb-16">
+            Each opportunity shares the same structural advantage: existing government funding, zero local competition, and a clear expansion path across all 8 Northeast states.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border border border-border">
+            {/* Primary Opportunity */}
+            <Reveal id="ashasetu" className="md:col-span-2 bg-card p-8 md:p-12 relative overflow-hidden group" delay={0.2}>
+              <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-accent to-accent-light" />
+              <div className="absolute top-6 right-8 font-mono text-7xl md:text-9xl font-bold text-accent/5 pointer-events-none">#1</div>
+              
+              <div className="flex flex-col lg:flex-row gap-12">
+                <div className="flex-1">
+                  <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
+                    <span className="w-1.5 h-1.5 bg-accent rounded-full" />
+                    PRIMARY OPPORTUNITY · RANK #1
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-serif font-bold mb-6">ASHASETU:<br />The Offline Platform</h3>
+                  <p className="text-muted text-sm md:text-base leading-relaxed mb-8 max-w-2xl">
+                    A lightweight, military-grade offline application for India's 4,000+ frontline ASHA workers in Tripura. ASHASETU enables digital beneficiary registration, antenatal care tracking, TB/malaria suspect flagging, and QR-coded referral generation — all without requiring a consistent internet connection. Built with Local LLM (Edge AI) for symptom analysis.
+                  </p>
+                  
+                  <div className="flex gap-4 mb-8">
+                    <Link to="/ashasetu" className="text-[12px] font-bold text-accent border border-accent/30 px-6 py-3 rounded-sm hover:bg-accent/10 transition-colors">
+                      Deep Dive: Technical Overview →
+                    </Link>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-border">
+                    {[
+                      { val: '₹1–2 Cr', label: 'ARR at Tripura Scale' },
+                      { val: '6–9 mo', label: 'MVP Timeline' },
+                      { val: '0', label: 'Competing Startups in NE' },
+                      { val: '75%+', label: 'Gross Margin at Scale' }
+                    ].map((m, i) => (
+                      <div key={i}>
+                        <div className="font-mono text-xl font-bold text-accent">{m.val}</div>
+                        <div className="text-[10px] text-muted uppercase tracking-wider mt-1">{m.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="lg:w-80 flex flex-col gap-6">
+                  <AshaAppPreview />
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Opportunity 2 */}
+            <Reveal className="bg-card p-10 relative overflow-hidden group hover:bg-[#1c2a1e] transition-colors" delay={0.3}>
+              <div className="absolute top-6 right-8 font-mono text-7xl font-bold text-accent/5 pointer-events-none">#2</div>
+              <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
+                HARDWARE + SOFTWARE
+              </div>
+              <h3 className="text-2xl font-serif font-bold mb-4">Cold-Chain Medicine Delivery</h3>
+              <p className="text-muted text-sm leading-relaxed mb-8">
+                Phase Change Material (PCM) carriers maintaining 2–8°C for 72–120 hours without electricity, paired with route optimisation software and real-time IoT temperature monitoring. Solves Tripura's pervasive cold-chain failure problem for vaccines, insulin, and blood products.
+              </p>
+            </Reveal>
+
+            {/* Opportunity 3 */}
+            <Reveal className="bg-card p-10 relative overflow-hidden group hover:bg-[#1c2a1e] transition-colors" delay={0.4}>
+              <div className="absolute top-6 right-8 font-mono text-7xl font-bold text-accent/5 pointer-events-none">#3</div>
+              <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
+                AI / ML MODULE
+              </div>
+              <h3 className="text-2xl font-serif font-bold mb-4">AI-Assisted TB & Malaria Screening</h3>
+              <p className="text-muted text-sm leading-relaxed mb-8">
+                Symptom-based AI screening integrated into the ASHA platform (or standalone) assigning TB/malaria probability scores to trigger priority referrals — reducing the 1–2 week diagnosis delay to hours.
+              </p>
+              <DelayReductionChart />
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Infrastructure Section */}
+      <section id="problems" className="py-24 bg-surface border-y border-border relative z-10">
+        <div className="max-w-7xl mx-auto px-6 md:px-10">
+          <SectionLabel>02 · Infrastructure Gap</SectionLabel>
+          <SectionTitle>The Healthcare<br />Infrastructure Reality</SectionTitle>
+          
+          <Reveal className="mt-12 overflow-x-auto border border-border rounded-sm" delay={0.2}>
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-accent/10">
+                <tr>
+                  <th className="font-mono text-[10px] tracking-widest text-accent uppercase p-5 text-left border-b border-border whitespace-nowrap">Facility Level</th>
+                  <th className="font-mono text-[10px] tracking-widest text-accent uppercase p-5 text-left border-b border-border whitespace-nowrap">Coverage Ratio</th>
+                  <th className="font-mono text-[10px] tracking-widest text-accent uppercase p-5 text-left border-b border-border whitespace-nowrap">Critical Gap</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-accent/5">
+                {[
+                  { level: 'Sub-Centres', ratio: '~1 per 3,000–5,000 population', gap: 'Shortage of female health workers; 24 vacancies' },
+                  { level: 'PHCs', ratio: '~1 per 30,000 population', gap: '39% lack lab technicians; 18% lack pharmacists' },
+                  { level: 'CHCs', ratio: '~1 per 120,000 population', gap: 'Specialist shortfall; inadequate referral network' }
+                ].map((row, i) => (
+                  <tr key={i} className="hover:bg-accent/5 transition-colors">
+                    <td className="p-5 text-text font-medium">{row.level}</td>
+                    <td className="p-5 text-muted">{row.ratio}</td>
+                    <td className="p-5 text-muted">{row.gap}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Startup Details */}
+      <section id="funding" className="py-24 relative z-10 border-t border-border">
+        <div className="max-w-7xl mx-auto px-6 md:px-10">
+          <SectionLabel>12 · Investment Details</SectionLabel>
+          <StartupDetails />
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contacts" className="py-24 relative z-10 border-t border-border">
+        <div className="max-w-7xl mx-auto px-6 md:px-10">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-10 mb-12">
+            <div className="flex-1 w-full">
+              <div className="font-mono text-[11px] text-accent tracking-widest uppercase mb-6">
+                ASHASETU · OFFLINE ECOSYSTEM BY ATSFY
+              </div>
+              <ContactForm />
+            </div>
+            
+            <div className="w-full md:w-80">
+              <div className="text-[10px] text-muted uppercase tracking-[0.2em] mb-6">Official Inquiries</div>
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                    <Mail size={18} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-muted uppercase">Email</div>
+                    <div className="text-sm font-bold">inquiries@atsfy.in</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                    <Linkedin size={18} />
+                  </div>
+                  <a href="#" className="text-[10px] text-muted uppercase hover:text-accent transition-colors">LinkedIn Profile</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-12 border-t border-border/30 px-6 md:px-10 bg-card/10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="font-serif font-black tracking-tighter text-sm uppercase">MEDTECH TRIPURA</div>
+          <div className="text-[10px] text-muted font-mono uppercase tracking-[0.3em]">
+            © 2026 ATSFY TECHNOLOGIES PVT LTD
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
