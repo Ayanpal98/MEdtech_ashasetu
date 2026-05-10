@@ -27,32 +27,76 @@ import { AshaAppPreview } from '../components/AshaAppPreview';
 import { AshaTrainingModule } from '../components/AshaTrainingModule';
 import { StartupDetails } from '../components/StartupDetails';
 import { ContactForm } from '../components/ContactForm';
+import { DiseaseBurden } from '../components/DiseaseBurden';
+import { Roadmap3D } from '../components/Roadmap3D';
+import { Financials } from '../components/Financials';
 import { Link } from 'react-router-dom';
 
-const SectionLabel = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-  <div className={`font-mono text-[11px] tracking-[0.2em] text-accent uppercase mb-4 ${className}`}>
+const SectionLabel = ({ children, className = "", id }: { children: React.ReactNode, className?: string, id?: string }) => (
+  <div id={id} className={`font-mono text-[11px] tracking-[0.2em] text-accent uppercase mb-4 ${className}`}>
     {children}
   </div>
 );
 
-const SectionTitle = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-  <h2 className={`font-serif text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] mb-5 ${className}`}>
+const SectionTitle = ({ children, className = "", id }: { children: React.ReactNode, className?: string, id?: string }) => (
+  <h2 id={id} className={`font-serif text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] mb-5 ${className}`}>
     {children}
   </h2>
 );
 
-const Reveal: React.FC<{ children: React.ReactNode, className?: string, delay?: number, id?: string }> = ({ children, className = "", delay = 0, id }) => (
+const HeartbeatBackground = () => (
+  <div className="absolute top-[25%] left-0 w-full h-[120px] pointer-events-none overflow-hidden opacity-10 z-0">
+    <svg width="200%" height="120" viewBox="0 0 2000 120" preserveAspectRatio="none">
+      <motion.path
+        d="M0 60 H400 L410 20 L425 100 L440 10 L460 110 L480 60 H900 L910 20 L925 100 L940 10 L960 110 L980 60 H1400 L1410 20 L1425 100 L1440 10 L1460 110 L1480 60 H2000"
+        fill="none"
+        stroke="var(--color-accent)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        animate={{
+          x: ["0%", "-50%"]
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+      />
+    </svg>
+    <div className="absolute inset-0 bg-linear-to-r from-bg via-transparent to-bg" />
+  </div>
+);
+
+const Reveal: React.FC<{ children: React.ReactNode, className?: string, delay?: number, id?: string, perspective?: boolean }> = ({ children, className = "", delay = 0, id, perspective = true }) => (
   <motion.div
     id={id}
-    initial={{ opacity: 0, y: 32 }}
-    whileInView={{ opacity: 1, y: 0 }}
+    initial={{ opacity: 0, y: 32, rotateX: perspective ? 10 : 0, perspective: 1000 }}
+    whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
     viewport={{ once: true, margin: "-100px" }}
-    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay }}
+    transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay }}
     className={className}
   >
     {children}
   </motion.div>
 );
+
+const TiltCard: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className = "" }) => {
+  return (
+    <motion.div
+      whileHover={{ 
+        rotateY: 5, 
+        rotateX: -5,
+        scale: 1.02,
+        z: 50
+      }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className={`relative transform-gpu perspective-1000 ${className}`}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 export const LandingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -84,7 +128,6 @@ export const LandingPage = () => {
     { name: 'Disease Burden', href: '#diseases' },
     { name: 'Roadmap', href: '#roadmap' },
     { name: 'Financials', href: '#financials' },
-    { name: 'Funding', href: '#funding' },
   ];
 
   return (
@@ -120,9 +163,9 @@ export const LandingPage = () => {
       />
 
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-100 transition-all duration-300 ${isScrolled ? 'bg-bg/95 backdrop-blur-md border-b border-border py-3' : 'bg-transparent py-5'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-100 transition-all duration-300 ${isScrolled ? 'bg-bg/95 backdrop-blur-md border-b border-border py-3' : 'bg-transparent py-5'}`} aria-label="Main Navigation">
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2 group">
+          <a href="#" className="flex items-center gap-2 group" aria-label="MedTech Tripura Home">
             <span className="font-mono text-sm md:text-base font-bold text-text tracking-tighter">
               MedTech<span className="text-accent">Tripura</span>
             </span>
@@ -152,6 +195,8 @@ export const LandingPage = () => {
           <button
             className="lg:hidden p-2 text-text"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-expanded={isMenuOpen}
+            aria-label="Toggle navigation menu"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -188,29 +233,31 @@ export const LandingPage = () => {
         </AnimatePresence>
       </nav>
 
-      {/* Hero Section */}
-      <section id="hero" className="relative min-h-screen pt-[60px] flex flex-col lg:flex-row overflow-hidden">
-        <ParticleCanvas />
-        <div className="orb w-[400px] h-[400px] bg-radial-[circle] from-accent/12 to-transparent top-[-100px] right-[-80px] animate-[orb-float_10s_ease-in-out_infinite]" />
-        <div className="orb w-[300px] h-[300px] bg-radial-[circle] from-accent-light/8 to-transparent bottom-[50px] left-[-60px] animate-[orb-float_13s_ease-in-out_infinite_delay-[-4s]]" />
-        
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(61,220,132,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(61,220,132,0.04)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none" />
-
-        <div className="flex-1 flex flex-col justify-center px-6 md:px-10 lg:pl-20 py-20 relative z-10">
-          <Reveal delay={0.3}>
-            <div className="inline-flex items-center gap-2 bg-accent/10 border border-border text-accent font-mono text-[11px] tracking-[0.15em] px-3 py-1.5 rounded-sm mb-9">
-              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-              MARCH 2026 · A VENTURE UNDER ATSFY TECHNOLOGIES
-            </div>
-          </Reveal>
-
-          <Reveal delay={0.5}>
-            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-black leading-[1.05] tracking-tight mb-6">
-              MedTech<br />
-              <em className="text-gradient not-italic">Opportunity</em><br />
-              in Tripura
-            </h1>
-          </Reveal>
+      <main>
+        {/* Hero Section */}
+        <section id="hero" className="relative min-h-screen pt-[60px] flex flex-col lg:flex-row overflow-hidden" aria-labelledby="hero-title">
+          <ParticleCanvas />
+          <HeartbeatBackground />
+          <div className="orb w-[400px] h-[400px] bg-radial-[circle] from-accent/12 to-transparent top-[-100px] right-[-80px] animate-[orb-float_10s_ease-in-out_infinite]" />
+          <div className="orb w-[300px] h-[300px] bg-radial-[circle] from-accent-light/8 to-transparent bottom-[50px] left-[-60px] animate-[orb-float_13s_ease-in-out_infinite_delay-[-4s]]" />
+          
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(61,220,132,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(61,220,132,0.04)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none" aria-hidden="true" />
+  
+          <div className="flex-1 flex flex-col justify-center px-6 md:px-10 lg:pl-20 py-20 relative z-10">
+            <Reveal delay={0.3}>
+              <div className="inline-flex items-center gap-2 bg-accent/10 border border-border text-accent font-mono text-[11px] tracking-[0.15em] px-3 py-1.5 rounded-sm mb-9">
+                <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" aria-hidden="true" />
+                MARCH 2026 · A VENTURE UNDER ATSFY TECHNOLOGIES
+              </div>
+            </Reveal>
+  
+            <Reveal delay={0.5}>
+              <h1 id="hero-title" className="font-serif text-5xl md:text-7xl lg:text-8xl font-black leading-[1.05] tracking-tight mb-6">
+                MedTech<br />
+                <em className="text-gradient not-italic">Opportunity</em><br />
+                in Tripura
+              </h1>
+            </Reveal>
 
           <Reveal delay={0.7}>
             <p className="text-muted text-lg md:text-xl max-w-lg mb-12 leading-relaxed">
@@ -236,10 +283,13 @@ export const LandingPage = () => {
               { num: '0', label: 'MedTech startups currently operating in NE India' },
               { num: '8', label: 'Northeast states sharing the same structural healthcare gap' }
             ].map((stat, i) => (
-              <Reveal key={i} delay={1 + i * 0.1} className="bg-card border border-border p-7 relative overflow-hidden group hover:border-accent/40 transition-colors">
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-accent to-transparent" />
-                <div className="text-3xl md:text-4xl font-serif font-black text-accent mb-2">{stat.num}</div>
-                <div className="text-[11px] text-muted leading-tight uppercase tracking-wider">{stat.label}</div>
+              <Reveal key={i} delay={1 + i * 0.1} className="relative z-10">
+                <TiltCard className="bg-card border border-border p-7 h-full overflow-hidden group hover:border-accent/40 hover:bg-white/5 transition-colors">
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-accent to-transparent" />
+                  <div className="text-3xl md:text-4xl font-serif font-black text-accent mb-2">{stat.num}</div>
+                  <div className="text-[11px] text-muted leading-tight uppercase tracking-wider">{stat.label}</div>
+                  <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/10 transition-all" />
+                </TiltCard>
               </Reveal>
             ))}
           </div>
@@ -259,10 +309,10 @@ export const LandingPage = () => {
       </section>
 
       {/* Tripura Healthcare Landscape */}
-      <section id="landscape" className="py-24 relative z-10 bg-bg">
+      <section id="landscape" className="py-24 relative z-10 bg-bg" aria-labelledby="landscape-title">
         <div className="max-w-7xl mx-auto px-6 md:px-10">
           <SectionLabel>02 · Tripura Healthcare Landscape</SectionLabel>
-          <SectionTitle>The Data Behind<br />the Opportunity</SectionTitle>
+          <SectionTitle id="landscape-title">The Data Behind<br />the Opportunity</SectionTitle>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-16">
             <Reveal className="lg:col-span-2" delay={0.2}>
@@ -340,91 +390,97 @@ export const LandingPage = () => {
       </section>
 
       {/* Opportunities Section */}
-      <section id="opportunities" className="py-24 relative z-10">
+      <section id="opportunities" className="py-24 relative z-10" aria-labelledby="opportunities-title">
         <div className="max-w-7xl mx-auto px-6 md:px-10">
           <SectionLabel>03 · Strategic Opportunities</SectionLabel>
-          <SectionTitle>Four High-Impact<br />Market Openings</SectionTitle>
+          <SectionTitle id="opportunities-title">Four High-Impact<br />Market Openings</SectionTitle>
           <p className="text-muted text-lg max-w-2xl mb-16">
             Each opportunity shares the same structural advantage: existing government funding, zero local competition, and a clear expansion path across all 8 Northeast states.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border border border-border">
             {/* Primary Opportunity */}
-            <Reveal id="ashasetu" className="md:col-span-2 bg-card p-8 md:p-12 relative overflow-hidden group" delay={0.2}>
-              <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-accent to-accent-light" />
-              <div className="absolute top-6 right-8 font-mono text-7xl md:text-9xl font-bold text-accent/5 pointer-events-none">#1</div>
-              
-              <div className="flex flex-col lg:flex-row gap-12">
-                <div className="flex-1">
-                  <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
-                    <span className="w-1.5 h-1.5 bg-accent rounded-full" />
-                    PRIMARY OPPORTUNITY · RANK #1
-                  </div>
-                  <h3 className="text-3xl md:text-4xl font-serif font-bold mb-6">ASHASETU:<br />The Offline Platform</h3>
-                  <p className="text-muted text-sm md:text-base leading-relaxed mb-8 max-w-2xl">
-                    A lightweight, military-grade offline application for India's 4,000+ frontline ASHA workers in Tripura. ASHASETU enables digital beneficiary registration, antenatal care tracking, TB/malaria suspect flagging, and QR-coded referral generation — all without requiring a consistent internet connection. Built with Local LLM (Edge AI) for symptom analysis.
-                  </p>
-                  
-                  <div className="flex gap-4 mb-8">
-                    <Link to="/ashasetu" className="text-[12px] font-bold text-accent border border-accent/30 px-6 py-3 rounded-sm hover:bg-accent/10 transition-colors">
-                      Deep Dive: Technical Overview →
-                    </Link>
+            <Reveal id="ashasetu" className="md:col-span-2 relative" delay={0.2}>
+              <TiltCard className="bg-card p-8 md:p-12 border border-border group hover:bg-[#1c2a1e]/40 transition-colors overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-accent to-accent-light" />
+                <div className="absolute top-6 right-8 font-mono text-7xl md:text-9xl font-bold text-accent/5 pointer-events-none">#1</div>
+                
+                <div className="flex flex-col lg:flex-row gap-12">
+                  <div className="flex-1">
+                    <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
+                      <span className="w-1.5 h-1.5 bg-accent rounded-full" />
+                      PRIMARY OPPORTUNITY · RANK #1
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-serif font-black mb-6">ASHASETU:<br />The Offline Platform</h3>
+                    <p className="text-muted text-sm md:text-base leading-relaxed mb-8 max-w-2xl">
+                      A lightweight, military-grade offline application for India's 4,000+ frontline ASHA workers in Tripura. ASHASETU enables digital beneficiary registration, antenatal care tracking, TB/malaria suspect flagging, and QR-coded referral generation — all without requiring a consistent internet connection. Built with Local LLM (Edge AI) for symptom analysis.
+                    </p>
+                    
+                    <div className="flex gap-4 mb-8">
+                      <Link to="/ashasetu" className="text-[12px] font-bold text-accent border border-accent/30 px-6 py-3 rounded-sm hover:bg-accent/10 transition-colors shadow-lg shadow-accent/5">
+                        Deep Dive: Technical Overview →
+                      </Link>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-border">
+                      {[
+                        { val: '₹1–2 Cr', label: 'ARR at Tripura Scale' },
+                        { val: '6–9 mo', label: 'MVP Timeline' },
+                        { val: '0', label: 'Competing Startups in NE' },
+                        { val: '75%+', label: 'Gross Margin at Scale' }
+                      ].map((m, i) => (
+                        <div key={i}>
+                          <div className="font-mono text-xl font-bold text-accent">{m.val}</div>
+                          <div className="text-[10px] text-muted uppercase tracking-wider mt-1">{m.label}</div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-border">
-                    {[
-                      { val: '₹1–2 Cr', label: 'ARR at Tripura Scale' },
-                      { val: '6–9 mo', label: 'MVP Timeline' },
-                      { val: '0', label: 'Competing Startups in NE' },
-                      { val: '75%+', label: 'Gross Margin at Scale' }
-                    ].map((m, i) => (
-                      <div key={i}>
-                        <div className="font-mono text-xl font-bold text-accent">{m.val}</div>
-                        <div className="text-[10px] text-muted uppercase tracking-wider mt-1">{m.label}</div>
-                      </div>
-                    ))}
+                  <div className="lg:w-80 flex flex-col gap-6">
+                    <AshaAppPreview />
                   </div>
                 </div>
-
-                <div className="lg:w-80 flex flex-col gap-6">
-                  <AshaAppPreview />
-                </div>
-              </div>
+              </TiltCard>
             </Reveal>
 
             {/* Opportunity 2 */}
-            <Reveal className="bg-card p-10 relative overflow-hidden group hover:bg-[#1c2a1e] transition-colors" delay={0.3}>
-              <div className="absolute top-6 right-8 font-mono text-7xl font-bold text-accent/5 pointer-events-none">#2</div>
-              <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
-                HARDWARE + SOFTWARE
-              </div>
-              <h3 className="text-2xl font-serif font-bold mb-4">Cold-Chain Medicine Delivery</h3>
-              <p className="text-muted text-sm leading-relaxed mb-8">
-                Phase Change Material (PCM) carriers maintaining 2–8°C for 72–120 hours without electricity, paired with route optimisation software and real-time IoT temperature monitoring. Solves Tripura's pervasive cold-chain failure problem for vaccines, insulin, and blood products.
-              </p>
+            <Reveal className="relative" delay={0.3}>
+              <TiltCard className="bg-card p-10 h-full border border-border overflow-hidden group hover:bg-[#1c2a1e] transition-colors">
+                <div className="absolute top-6 right-8 font-mono text-7xl font-bold text-accent/5 pointer-events-none">#2</div>
+                <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
+                  HARDWARE + SOFTWARE
+                </div>
+                <h3 className="text-2xl font-serif font-black mb-4">Cold-Chain Medicine Delivery</h3>
+                <p className="text-muted text-sm leading-relaxed mb-8">
+                  Phase Change Material (PCM) carriers maintaining 2–8°C for 72–120 hours without electricity, paired with route optimisation software and real-time IoT temperature monitoring. Solves Tripura's pervasive cold-chain failure problem for vaccines, insulin, and blood products.
+                </p>
+              </TiltCard>
             </Reveal>
 
             {/* Opportunity 3 */}
-            <Reveal className="bg-card p-10 relative overflow-hidden group hover:bg-[#1c2a1e] transition-colors" delay={0.4}>
-              <div className="absolute top-6 right-8 font-mono text-7xl font-bold text-accent/5 pointer-events-none">#3</div>
-              <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
-                AI / ML MODULE
-              </div>
-              <h3 className="text-2xl font-serif font-bold mb-4">AI-Assisted TB & Malaria Screening</h3>
-              <p className="text-muted text-sm leading-relaxed mb-8">
-                Symptom-based AI screening integrated into the ASHA platform (or standalone) assigning TB/malaria probability scores to trigger priority referrals — reducing the 1–2 week diagnosis delay to hours.
-              </p>
-              <DelayReductionChart />
+            <Reveal className="relative" delay={0.4}>
+              <TiltCard className="bg-card p-10 h-full border border-border overflow-hidden group hover:bg-[#1c2a1e] transition-colors">
+                <div className="absolute top-6 right-8 font-mono text-7xl font-bold text-accent/5 pointer-events-none">#3</div>
+                <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
+                  AI / ML MODULE
+                </div>
+                <h3 className="text-2xl font-serif font-black mb-4">AI-Assisted TB & Malaria Screening</h3>
+                <p className="text-muted text-sm leading-relaxed mb-8">
+                  Symptom-based AI screening integrated into the ASHA platform (or standalone) assigning TB/malaria probability scores to trigger priority referrals — reducing the 1–2 week diagnosis delay to hours.
+                </p>
+                <DelayReductionChart />
+              </TiltCard>
             </Reveal>
           </div>
         </div>
       </section>
 
       {/* Infrastructure Section */}
-      <section id="problems" className="py-24 bg-surface border-y border-border relative z-10">
+      <section id="problems" className="py-24 bg-surface border-y border-border relative z-10" aria-labelledby="problems-title">
         <div className="max-w-7xl mx-auto px-6 md:px-10">
-          <SectionLabel>02 · Infrastructure Gap</SectionLabel>
-          <SectionTitle>The Healthcare<br />Infrastructure Reality</SectionTitle>
+          <SectionLabel>04 · Infrastructure Gap</SectionLabel>
+          <SectionTitle id="problems-title">The Healthcare<br />Infrastructure Reality</SectionTitle>
           
           <Reveal className="mt-12 overflow-x-auto border border-border rounded-sm" delay={0.2}>
             <table className="w-full border-collapse text-sm">
@@ -453,10 +509,15 @@ export const LandingPage = () => {
         </div>
       </section>
 
+      {/* New Sections */}
+      <DiseaseBurden />
+      <Roadmap3D />
+      <Financials />
+
       {/* Startup Details */}
-      <section id="funding" className="py-24 relative z-10 border-t border-border">
+      <section className="py-24 relative z-10 border-t border-border focus:outline-none">
         <div className="max-w-7xl mx-auto px-6 md:px-10">
-          <SectionLabel>12 · Investment Details</SectionLabel>
+          <SectionLabel>08 · Corporate Profile</SectionLabel>
           <StartupDetails />
         </div>
       </section>
@@ -484,19 +545,19 @@ export const LandingPage = () => {
                     <div className="text-sm font-bold">inquiries@atsfy.in</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                    <Linkedin size={18} />
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                      <Linkedin size={18} />
+                    </div>
+                    <a href="https://www.linkedin.com/company/asha-setu/" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted uppercase hover:text-accent transition-colors">LinkedIn Profile</a>
                   </div>
-                  <a href="#" className="text-[10px] text-muted uppercase hover:text-accent transition-colors">LinkedIn Profile</a>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="py-12 border-t border-border/30 px-6 md:px-10 bg-card/10">
+      <footer className="py-12 border-t border-border/30 px-6 md:px-10 bg-card/10" role="contentinfo">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="font-serif font-black tracking-tighter text-sm uppercase">MEDTECH TRIPURA</div>
           <div className="text-[10px] text-muted font-mono uppercase tracking-[0.3em]">
@@ -504,6 +565,7 @@ export const LandingPage = () => {
           </div>
         </div>
       </footer>
+    </main>
     </div>
   );
 };

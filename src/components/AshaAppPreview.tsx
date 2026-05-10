@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, 
   Search, 
@@ -19,11 +19,31 @@ import {
   X,
   Phone,
   MapPin,
-  Cpu
+  Cpu,
+  Database
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 
 export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean }) => {
+  const triggerHaptic = (pattern: number | number[] = 15) => {
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(pattern);
+      } catch (e) {
+        // Silently fail if vibration is blocked or not supported
+      }
+    }
+  };
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    container: scrollRef,
+  });
+
+  const parallax1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const parallax2 = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const parallax3 = useTransform(scrollYProgress, [0, 1], [0, -40]);
+
   const [screen, setScreen] = useState('home');
   const [language, setLanguage] = useState<'bn' | 'kb' | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -135,21 +155,26 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
   const handleSync = () => {
     if (pendingRecords === 0) {
       triggerToast(t.noRecords);
+      triggerHaptic(10);
       return;
     }
+    triggerHaptic([40, 30, 40]);
     setIsSyncing(true);
     setTimeout(() => {
       setIsSyncing(false);
       setPendingRecords(0);
       triggerToast(t.syncedToCloud);
+      triggerHaptic(20);
     }, 2000);
   };
 
   const handleAnalyze = () => {
+    triggerHaptic([30, 40]);
     setIsAnalyzing(true);
     setTimeout(() => {
       setIsAnalyzing(false);
       triggerToast('AI Analysis Complete');
+      triggerHaptic([40, 30, 40]);
     }, 2500);
   };
 
@@ -173,26 +198,64 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
   };
 
   return (
-    <div className={`relative bg-[#0a0a0a] overflow-hidden group select-none transition-all duration-500 ${
+    <motion.div 
+      animate={!fullScreen ? {
+        y: [0, -10, 0],
+        rotateX: [0, 2, 0],
+        rotateY: [0, -2, 0]
+      } : {}}
+      transition={!fullScreen ? {
+        duration: 6,
+        repeat: Infinity,
+        ease: "easeInOut"
+      } : {}}
+      whileHover={!fullScreen ? {
+        scale: 1.05,
+        rotateY: 8,
+        rotateX: -5,
+        z: 50,
+      } : {}}
+      className={`relative transform-gpu perspective-1000 bg-black overflow-hidden group select-none transition-all duration-700 ${
       fullScreen 
         ? 'w-full h-full' 
-        : 'w-full max-w-[280px] mx-auto aspect-[9/19] rounded-[32px] border-[6px] border-[#1a1a1a] shadow-2xl'
+        : 'w-full max-w-[280px] mx-auto aspect-[9/19] rounded-[48px] border-[8px] border-[#1c1c1e] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)]'
     }`}>
+      {/* Background Atmosphere & Parallax Shapes */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <motion.div 
+          style={{ y: parallax1 }}
+          className="absolute top-[-10%] left-[-10%] w-[80%] h-[40%] rounded-full bg-accent/20 blur-[80px]" 
+        />
+        <motion.div 
+          style={{ y: parallax2 }}
+          className="absolute bottom-[20%] right-[-5%] w-[60%] h-[50%] rounded-full bg-accent-light/10 blur-[100px]" 
+        />
+        <motion.div 
+          style={{ y: parallax3 }}
+          className="absolute top-[30%] right-[10%] w-[30%] h-[20%] rounded-full bg-accent/5 blur-[60px]" 
+        />
+        
+        {/* Subtle Glass Textures */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+      </div>
+
       {/* Speaker/Camera Notch - Only in phone mode */}
       {!fullScreen && (
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-[#1a1a1a] rounded-b-xl z-30 flex items-center justify-center">
-          <div className="w-8 h-1 bg-[#222] rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#1c1c1e] rounded-b-[18px] z-40 flex items-center justify-center">
+          <div className="w-10 h-1 bg-black/40 rounded-full" />
         </div>
       )}
 
       {/* Status Bar */}
-      <div className={`bg-accent/10 flex justify-between items-center font-mono text-accent/80 z-20 ${
-        fullScreen ? 'h-8 px-6 text-[10px]' : 'h-6 px-4 text-[8px] pt-1'
+      <div className={`flex justify-between items-center font-sans font-medium text-white/50 z-20 ${
+        fullScreen ? 'h-10 px-8 text-[12px]' : 'h-8 px-6 text-[9px] pt-2'
       }`}>
-        <span>10:42 AM</span>
-        <div className="flex items-center gap-1">
-          <WifiOff size={fullScreen ? 12 : 8} />
-          <span>OFFLINE</span>
+        <span className="tracking-tight">10:42</span>
+        <div className="flex items-center gap-1.5">
+          <WifiOff size={fullScreen ? 14 : 10} className="text-accent" />
+          <div className="w-4 h-2 rounded-[2px] border border-white/20 relative">
+             <div className="absolute inset-[1px] bg-white/60 rounded-[1px] w-[80%]" />
+          </div>
         </div>
       </div>
 
@@ -213,25 +276,51 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
       </AnimatePresence>
 
       {/* App Header */}
-      <div className={`bg-accent flex justify-between items-center z-20 relative ${fullScreen ? 'p-6' : 'p-4'}`}>
-        <div className="flex items-center gap-3">
+      <div className={`backdrop-blur-2xl border-b border-white/10 bg-white/5 flex justify-between items-center z-20 relative transition-all duration-500 shadow-xl ${fullScreen ? 'p-8 h-24' : 'p-5'}`}>
+        <div className="flex items-center gap-4">
           {screen === 'home' ? (
-            <Menu size={fullScreen ? 24 : 16} className="text-bg cursor-pointer" />
+            <div className="w-8 h-8 rounded-xl bg-accent/20 backdrop-blur-md flex items-center justify-center border border-accent/20">
+              <Menu size={fullScreen ? 20 : 14} className="text-accent cursor-pointer" onClick={() => {
+                triggerHaptic(15);
+                setScreen('settings');
+              }} />
+            </div>
           ) : (
-            <ArrowLeft size={fullScreen ? 24 : 16} className="text-bg cursor-pointer" onClick={() => setScreen('home')} />
+            <div 
+              className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+              onClick={() => {
+                triggerHaptic(10);
+                setScreen('home');
+              }}
+            >
+              <ArrowLeft size={fullScreen ? 20 : 14} className="text-white" />
+            </div>
           )}
-          <span className={`font-serif font-bold text-bg ${fullScreen ? 'text-xl' : 'text-sm'}`}>
+          <span className={`font-sans font-bold text-white tracking-tight ${fullScreen ? 'text-2xl' : 'text-[15px]'}`}>
             {getHeaderTitle()}
           </span>
         </div>
-        <div className="relative cursor-pointer" onClick={() => setScreen('alerts')}>
-          <Bell size={fullScreen ? 24 : 16} className="text-bg" />
-          <div className={`absolute -top-1 -right-1 bg-red-500 rounded-full border-2 border-accent ${fullScreen ? 'w-3 h-3' : 'w-2 h-2'}`} />
+        <div className="relative group" onClick={() => {
+          triggerHaptic(15);
+          setScreen('alerts');
+        }}>
+          <button 
+            className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:bg-white/20 transition-colors"
+            aria-label={`${getHeaderTitle()} notifications`}
+          >
+            <Bell size={fullScreen ? 20 : 14} className="text-white" />
+          </button>
+          <div 
+            className={`absolute top-0 right-0 bg-red-500 rounded-full border-2 border-black animate-pulse ${fullScreen ? 'w-4 h-4' : 'w-2.5 h-2.5'}`} 
+            aria-hidden="true"
+          />
         </div>
       </div>
 
       {/* App Content */}
-      <div className={`overflow-y-auto custom-scrollbar relative z-10 ${
+      <div 
+        ref={scrollRef}
+        className={`overflow-y-auto custom-scrollbar relative z-10 ${
         fullScreen ? 'p-10 h-[calc(100%-144px)]' : 'p-3 h-[calc(100%-100px)]'
       }`}>
         <AnimatePresence mode="wait">
@@ -241,31 +330,52 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center p-6 text-center"
+              className="absolute inset-0 z-50 bg-black/40 backdrop-blur-3xl flex flex-col items-center justify-center p-8 text-center"
             >
-              <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-6">
-                <Activity size={24} className="text-bg" />
+              <div className="absolute inset-0 -z-10 overflow-hidden">
+                <div className="absolute top-[20%] left-[10%] w-64 h-64 bg-accent/20 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[20%] right-[10%] w-64 h-64 bg-accent-light/10 rounded-full blur-[120px]" />
               </div>
-              <h2 className="text-xl font-serif font-bold text-text mb-2">ASHASETU</h2>
-              <p className="text-[10px] text-muted uppercase tracking-widest mb-8">Select Language / ভাষা চয়ন করুন</p>
+
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                className="w-20 h-20 bg-accent rounded-[24px] flex items-center justify-center mb-8 shadow-[0_20px_40px_rgba(61,220,132,0.3)]"
+              >
+                <Activity size={40} className="text-bg" />
+              </motion.div>
               
-              <div className="w-full space-y-3">
+              <h2 className="text-3xl font-sans font-black text-white tracking-tighter mb-2">ASHASETU</h2>
+              <p className="text-[12px] text-white/50 uppercase font-semibold tracking-[0.2em] mb-12">Select Language / ভাষা চয়ন করুন</p>
+              
+              <div className="w-full max-w-[320px] space-y-4" role="group" aria-label="Language selection">
                 <button 
-                  onClick={() => setLanguage('bn')}
-                  className="w-full bg-accent/10 border border-accent/20 py-4 rounded-sm text-accent font-bold hover:bg-accent hover:text-bg transition-all"
+                  onClick={() => {
+                    triggerHaptic(20);
+                    setLanguage('bn');
+                  }}
+                  className="group relative w-full bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-[24px] overflow-hidden hover:bg-white/10 transition-all duration-300 shadow-xl"
+                  aria-label="Select Bengali language"
                 >
-                  বাংলা (BENGALI)
+                  <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="relative text-lg font-bold text-white tracking-tight">বাংলা (BENGALI)</span>
                 </button>
+                
                 <button 
-                  onClick={() => setLanguage('kb')}
-                  className="w-full bg-accent/10 border border-accent/20 py-4 rounded-sm text-accent font-bold hover:bg-accent hover:text-bg transition-all"
+                  onClick={() => {
+                    triggerHaptic(20);
+                    setLanguage('kb');
+                  }}
+                  className="group relative w-full bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-[24px] overflow-hidden hover:bg-white/10 transition-all duration-300 shadow-xl"
+                  aria-label="Select Kokborok language"
                 >
-                  KOKBOROK
+                  <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="relative text-lg font-bold text-white tracking-tight uppercase">Kokborok</span>
                 </button>
               </div>
               
-              <div className="mt-12 text-[7px] text-muted uppercase font-mono tracking-tighter">
-                Frontline Health Infrastructure · Tripura
+              <div className="mt-16 text-[9px] text-white/30 uppercase font-bold tracking-[0.3em]">
+                Enterprise Grade Health Infrastructure
               </div>
             </motion.div>
           )}
@@ -278,104 +388,131 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               exit={{ x: 20, opacity: 0 }}
             >
               {/* Welcome Section */}
-              <div className="mb-8">
-                <div className={`${fullScreen ? 'text-sm' : 'text-[10px]'} text-muted uppercase tracking-widest mb-2`}>{t.welcome}</div>
-                <div className={`${fullScreen ? 'text-4xl' : 'text-text'} font-serif font-bold`}>{t.ashaName}</div>
-                <div className={`${fullScreen ? 'text-base' : 'text-[9px]'} text-accent font-mono mt-2`}>{t.sector}</div>
+              <div className="mb-10">
+                <div className={`${fullScreen ? 'text-sm' : 'text-[11px]'} text-accent font-bold uppercase tracking-[0.2em] mb-2`}>{t.welcome}</div>
+                <div className={`${fullScreen ? 'text-5xl' : 'text-3xl'} font-sans font-black text-white tracking-tighter`}>{t.ashaName}</div>
+                <div className={`${fullScreen ? 'text-lg' : 'text-[10px]'} text-white/40 font-medium mt-2`}>{t.sector}</div>
               </div>
 
-              {/* Sync Banner */}
-              <div className="bg-accent/5 border border-accent/20 p-2 rounded-sm mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <RefreshCw size={12} className={`text-accent ${isSyncing ? 'animate-spin' : ''}`} />
-                  <span className="text-[9px] text-text font-medium">
-                    {isSyncing ? t.syncing : t.pending(pendingRecords)}
-                  </span>
-                </div>
+              {/* Sync Pill */}
+              <div className="flex justify-center mb-8">
                 <button 
                   onClick={handleSync}
                   disabled={isSyncing}
-                  className="text-[8px] bg-accent text-bg px-2 py-0.5 rounded-xs font-bold uppercase disabled:opacity-50"
+                  className="group relative flex items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-full hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50 overflow-hidden shadow-lg shadow-black/20"
                 >
-                  {isSyncing ? '...' : 'Sync'}
+                  <RefreshCw size={14} className={`text-accent ${isSyncing ? 'animate-spin' : ''}`} />
+                  <span className="text-[10px] text-white font-bold tracking-tight">
+                    {isSyncing ? t.syncing : t.pending(pendingRecords)}
+                  </span>
+                  {isSyncing && (
+                    <motion.div 
+                      className="absolute inset-x-0 bottom-0 h-[2px] bg-accent"
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 2 }}
+                    />
+                  )}
                 </button>
               </div>
 
-              {/* Local Storage & AI Status */}
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                <div className="bg-white/5 border border-border/50 p-2 rounded-sm">
-                  <div className="text-[7px] text-muted uppercase tracking-wider">{t.localStorage}</div>
-                  <div className="text-[9px] font-bold text-accent">{`142 ${t.recordsUnit}`} (SQLite)</div>
+              {/* Grid Layout: Bento Style */}
+              <div className="grid grid-cols-6 gap-3 mb-6">
+                {/* Local Storage */}
+                <div className="col-span-3 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-[24px]">
+                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center mb-3">
+                    <Database size={16} className="text-accent" />
+                  </div>
+                  <div className="text-[10px] text-white/50 uppercase font-bold tracking-wider mb-1">{t.localStorage}</div>
+                  <div className="text-[13px] font-bold text-white leading-tight">{`142 ${t.recordsUnit}`}</div>
+                  <div className="text-[9px] text-accent/60 font-mono mt-1">SQLite Active</div>
                 </div>
-                <div className="bg-white/5 border border-border/50 p-2 rounded-sm">
-                  <div className="text-[7px] text-muted uppercase tracking-wider">{t.edgeAI}</div>
-                  <div className="text-[9px] font-bold text-accent">{t.modelsLoaded}</div>
+
+                {/* Edge AI */}
+                <div className="col-span-3 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-[24px]">
+                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center mb-3">
+                    <Cpu size={16} className="text-accent" />
+                  </div>
+                  <div className="text-[10px] text-white/50 uppercase font-bold tracking-wider mb-1">{t.edgeAI}</div>
+                  <div className="text-[13px] font-bold text-white leading-tight">{t.modelsLoaded}</div>
+                  <div className="text-[9px] text-accent/60 font-mono mt-1">NPU Core Enabled</div>
+                </div>
+
+                {/* Offline Map Pill */}
+                <div className="col-span-6 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-[24px] flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                    <MapPin size={20} className="text-accent" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-[12px] font-bold text-white">Majlishpur Sector 2</div>
+                    <div className="text-[10px] text-white/40">Offline Maps Cache (12.4 MB)</div>
+                  </div>
+                  <div className="px-3 py-1 bg-accent/10 rounded-full border border-accent/20 text-[9px] font-black text-accent uppercase">Active</div>
                 </div>
               </div>
 
-              {/* Offline Map Indicator */}
-              <div className="flex items-center gap-2 mb-4 bg-white/5 p-2 rounded-sm border border-border/50">
-                <MapPin size={12} className="text-accent" />
-                <div className="flex-1">
-                  <div className="text-[8px] font-bold text-text uppercase">Offline Map: Majlishpur</div>
-                  <div className="text-[7px] text-muted">Sector 2 cache active (12.4 MB)</div>
-                </div>
-                <div className="text-[6px] bg-accent/20 text-accent px-1 rounded-xs font-bold">CACHED</div>
-              </div>
-
-              {/* Search */}
-              <div className="relative mb-4">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted" size={12} />
-                <input 
-                  type="text" 
-                  placeholder={t.searchPlaceholder} 
-                  className="w-full bg-[#151515] border border-border rounded-sm py-1.5 pl-8 pr-2 text-[10px] text-text outline-none focus:border-accent/50"
-                  readOnly
-                  onClick={() => setScreen('patients')}
-                />
-              </div>
-
-              {/* Quick Actions */}
-              <div className="grid grid-cols-2 gap-2 mb-4">
+              {/* Main Actions */}
+              <div className="grid grid-cols-2 gap-4 mb-8">
                 <button 
-                  onClick={() => setScreen('new')}
-                  className="bg-accent/10 border border-accent/20 p-3 rounded-sm flex flex-col items-center gap-2 hover:bg-accent/20 transition-colors active:scale-95"
+                  onClick={() => {
+                    triggerHaptic(15);
+                    setScreen('new');
+                  }}
+                  className="group relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 flex flex-col items-start gap-4 hover:bg-white/10 active:scale-95 transition-all overflow-hidden text-left shadow-xl"
+                  aria-label={t.newPatient}
                 >
-                  <Plus size={16} className="text-accent" />
-                  <span className="text-[9px] font-bold text-text text-center leading-tight">{t.newPatient}</span>
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform" aria-hidden="true">
+                    <Plus size={80} />
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-accent/20 backdrop-blur-md flex items-center justify-center border border-accent/20">
+                    <Plus size={24} className="text-accent" />
+                  </div>
+                  <span className="text-[16px] font-black text-white tracking-tighter leading-none">{t.newPatient}</span>
                 </button>
+                
                 <button 
-                  onClick={() => setScreen('screening')}
-                  className="bg-accent/10 border border-accent/20 p-3 rounded-sm flex flex-col items-center gap-2 hover:bg-accent/20 transition-colors active:scale-95"
+                  onClick={() => {
+                    triggerHaptic(15);
+                    setScreen('screening');
+                  }}
+                  className="group relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 flex flex-col items-start gap-4 hover:bg-white/10 active:scale-95 transition-all overflow-hidden text-left shadow-xl"
+                  aria-label={t.screening}
                 >
-                  <Activity size={16} className="text-accent" />
-                  <span className="text-[9px] font-bold text-text text-center leading-tight">{t.screening}</span>
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-125 transition-transform" aria-hidden="true">
+                    <Activity size={80} />
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-accent/20 backdrop-blur-md flex items-center justify-center border border-accent/20">
+                    <Activity size={24} className="text-accent" />
+                  </div>
+                  <span className="text-[16px] font-black text-white tracking-tighter leading-none">{t.screening}</span>
                 </button>
               </div>
 
               {/* Recent Referrals */}
-              <div className="mb-4">
-                <div className="text-[9px] text-muted uppercase tracking-widest mb-2 flex justify-between">
-                  <span>{t.recentReferrals}</span>
-                  <span className="text-accent cursor-pointer">{t.viewAll}</span>
+              <div className="mb-10">
+                <div className="text-[11px] text-accent font-bold uppercase tracking-[0.2em] mb-4 flex justify-between items-center group">
+                  <span className="flex items-center gap-2">
+                    <Activity size={14} /> {t.recentReferrals}
+                  </span>
+                  <span className="text-[10px] text-white/30 cursor-pointer hover:text-accent transition-colors">{t.viewAll}</span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {[
-                    { name: 'S. Reang', type: 'TB Suspect', status: 'High Risk', color: 'text-red-500' },
-                    { name: 'M. Chakma', type: 'ANC Visit 3', status: 'Normal', color: 'text-accent' },
-                    { name: 'B. Das', type: 'Malaria', status: 'Follow-up', color: 'text-yellow-500' }
+                    { name: 'S. Reang', type: 'TB Suspect', status: 'High Risk', color: 'bg-red-500/10 border-red-500/20 text-red-500' },
+                    { name: 'M. Chakma', type: 'ANC Visit 3', status: 'Normal', color: 'bg-accent/10 border-accent/20 text-accent' },
+                    { name: 'B. Das', type: 'Malaria', status: 'Follow-up', color: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' }
                   ].map((patient, i) => (
-                    <div key={i} className="bg-[#151515] border border-border p-2 rounded-sm flex items-center justify-between hover:bg-white/5 cursor-pointer transition-colors">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center text-[10px] text-accent font-bold">
+                    <div key={i} className="group bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-[24px] flex items-center justify-between hover:bg-white/10 transition-all cursor-pointer shadow-lg shadow-black/20 border-t-white/20 border-l-white/20">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-white/5 backdrop-blur-md flex items-center justify-center text-[18px] text-white/20 font-black border border-white/10 transition-transform group-hover:scale-105">
                           {patient.name[0]}
                         </div>
                         <div>
-                          <div className="text-[10px] font-bold text-text">{patient.name}</div>
-                          <div className="text-[8px] text-muted">{patient.type}</div>
+                          <div className="text-[15px] font-bold text-white tracking-tight">{patient.name}</div>
+                          <div className="text-[11px] text-white/40 font-medium">{patient.type}</div>
                         </div>
                       </div>
-                      <div className={`text-[8px] font-bold uppercase ${patient.color}`}>
+                      <div className={`text-[9px] font-black uppercase px-3 py-1 rounded-full border backdrop-blur-md ${patient.color}`}>
                         {patient.status}
                       </div>
                     </div>
@@ -384,12 +521,22 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               </div>
 
               {/* Health Tips / Alerts */}
-              <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-sm cursor-pointer" onClick={() => setScreen('alerts')}>
-                <div className="flex items-center gap-2 mb-1">
-                  <AlertCircle size={10} className="text-red-500" />
-                  <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider">{t.healthAlert}</span>
+              <div 
+                className="group relative bg-red-500/5 backdrop-blur-md border border-red-500/10 p-6 rounded-[32px] cursor-pointer hover:bg-red-500/10 transition-all mb-24 overflow-hidden" 
+                onClick={() => setScreen('alerts')}
+                role="alert"
+                aria-label={`Health Alert: ${t.healthAlert}`}
+              >
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform" aria-hidden="true">
+                  <AlertCircle size={60} className="text-red-500" />
                 </div>
-                <p className="text-[8px] text-muted leading-tight">{t.malariaWarning}</p>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
+                    <AlertCircle size={20} className="text-red-500" />
+                  </div>
+                  <span className="text-[14px] font-black text-red-500 uppercase tracking-widest">{t.healthAlert}</span>
+                </div>
+                <p className="text-[13px] text-white/50 leading-relaxed font-medium">{t.malariaWarning}</p>
               </div>
             </motion.div>
           )}
@@ -400,23 +547,26 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -20, opacity: 0 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              <div className="flex justify-between items-center">
-                <div className="text-[10px] text-muted uppercase tracking-widest">{t.patients}</div>
-                <div className="text-[8px] text-accent font-bold">Total: 142</div>
+              <div className="flex justify-between items-end mb-4">
+                <div>
+                  <div className="text-[10px] text-accent font-bold uppercase tracking-[0.2em] mb-1">{t.patients}</div>
+                  <div className="text-2xl font-sans font-black text-white tracking-tighter">Directory</div>
+                </div>
+                <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] text-white/50 font-bold">142 Total</div>
               </div>
               
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted" size={10} />
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-accent transition-colors" size={16} />
                 <input 
                   type="text" 
                   placeholder={t.searchPlaceholder} 
-                  className="w-full bg-[#151515] border border-border rounded-sm py-1 pl-7 pr-2 text-[9px] text-text outline-none"
+                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-[13px] text-white outline-none focus:border-accent/40 focus:bg-white/10 transition-all placeholder:text-white/20 shadow-inner"
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[
                   { name: 'S. Reang', id: 'TR-0921', risk: 'High' },
                   { name: 'M. Chakma', id: 'TR-0842', risk: 'Low' },
@@ -425,20 +575,32 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
                   { name: 'P. Jamatia', id: 'TR-1254', risk: 'Medium' },
                   { name: 'K. Tripura', id: 'TR-0998', risk: 'High' },
                 ].map((p, i) => (
-                  <div key={i} className="bg-[#151515] border border-border p-2 rounded-sm flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-accent/5 flex items-center justify-center text-[9px] text-accent font-bold border border-accent/10">
+                  <motion.div 
+                    key={i} 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="group bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-[24px] flex items-center justify-between hover:bg-white/10 transition-all cursor-pointer active:scale-[0.98] shadow-lg border-t-white/20 border-l-white/20"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-2xl bg-accent/20 backdrop-blur-md flex items-center justify-center text-[14px] text-accent font-black border border-accent/20 group-hover:bg-accent group-hover:text-bg transition-colors">
                         {p.name[0]}
                       </div>
                       <div>
-                        <div className="text-[9px] font-bold text-text">{p.name}</div>
-                        <div className="text-[7px] text-muted">ID: {p.id}</div>
+                        <div className="text-[14px] font-bold text-white tracking-tight">{p.name}</div>
+                        <div className="text-[10px] text-white/40 font-mono tracking-widest uppercase">ID: {p.id}</div>
                       </div>
                     </div>
-                    <div className={`text-[7px] font-bold px-1.5 py-0.5 rounded-xs ${p.risk === 'High' ? 'bg-red-500/10 text-red-500' : p.risk === 'Medium' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-accent/10 text-accent'}`}>
+                    <div className={`text-[10px] font-black px-3 py-1 rounded-full border backdrop-blur-md ${
+                      p.risk === 'High' 
+                        ? 'bg-red-500/10 border-red-500/20 text-red-500' 
+                        : p.risk === 'Medium' 
+                          ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' 
+                          : 'bg-accent/10 border-accent/20 text-accent'
+                    }`}>
                       {p.risk}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -455,31 +617,31 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               <div className="text-[10px] text-muted uppercase tracking-widest">{t.alerts}</div>
               
               <div className="space-y-3">
-                <div className="bg-red-500/5 border border-red-500/20 p-3 rounded-sm">
+                <div className="bg-red-500/10 backdrop-blur-xl border border-red-500/20 p-4 rounded-[24px] shadow-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertCircle size={14} className="text-red-500" />
                     <span className="text-[10px] font-bold text-red-500 uppercase">Malaria Outbreak</span>
                   </div>
-                  <p className="text-[9px] text-muted mb-2">High incidence reported in Majlishpur Sector 2. Immediate screening of all fever cases required.</p>
-                  <div className="text-[7px] text-muted font-mono uppercase">2 Hours Ago</div>
+                  <p className="text-[11px] text-white/70 mb-2 leading-relaxed">High incidence reported in Majlishpur Sector 2. Immediate screening of all fever cases required.</p>
+                  <div className="text-[9px] text-white/30 font-mono uppercase">2 Hours Ago</div>
                 </div>
 
-                <div className="bg-accent/5 border border-accent/20 p-3 rounded-sm">
+                <div className="bg-accent/10 backdrop-blur-xl border border-accent/20 p-4 rounded-[24px] shadow-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <Bell size={14} className="text-accent" />
                     <span className="text-[10px] font-bold text-accent uppercase">Vaccination Drive</span>
                   </div>
-                  <p className="text-[9px] text-muted mb-2">Pulse Polio drive scheduled for next Sunday. Please update your target list.</p>
-                  <div className="text-[7px] text-muted font-mono uppercase">Yesterday</div>
+                  <p className="text-[11px] text-white/70 mb-2 leading-relaxed">Pulse Polio drive scheduled for next Sunday. Please update your target list.</p>
+                  <div className="text-[9px] text-white/30 font-mono uppercase">Yesterday</div>
                 </div>
 
-                <div className="bg-yellow-500/5 border border-yellow-500/20 p-3 rounded-sm">
+                <div className="bg-yellow-500/10 backdrop-blur-xl border border-yellow-500/20 p-4 rounded-[24px] shadow-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <RefreshCw size={14} className="text-yellow-500" />
                     <span className="text-[10px] font-bold text-yellow-500 uppercase">System Update</span>
                   </div>
-                  <p className="text-[9px] text-muted mb-2">New TB screening protocols added. Please sync your device to update the AI model.</p>
-                  <div className="text-[7px] text-muted font-mono uppercase">2 Days Ago</div>
+                  <p className="text-[11px] text-white/70 mb-2 leading-relaxed">New TB screening protocols added. Please sync your device to update the AI model.</p>
+                  <div className="text-[9px] text-white/30 font-mono uppercase">2 Days Ago</div>
                 </div>
               </div>
             </motion.div>
@@ -491,87 +653,107 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -20, opacity: 0 }}
-              className="space-y-4"
+              className="space-y-6 pb-24"
             >
-              <div className="text-[10px] text-muted uppercase tracking-widest">{t.people}</div>
+              <div className="mb-4">
+                <div className="text-[10px] text-accent font-bold uppercase tracking-[0.2em] mb-1">{t.people}</div>
+                <div className="text-2xl font-sans font-black text-white tracking-tighter">Support Network</div>
+              </div>
               
-              <div className="space-y-3">
+              <div className="space-y-4" role="list">
                 {/* Language Selection Action */}
-                <div className="bg-[#151515] border border-border p-3 rounded-sm mb-4">
-                  <div className="text-[8px] text-muted uppercase mb-3 tracking-widest">Language / ভাষা</div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => setLanguage('bn')}
-                      className={`flex-1 py-1.5 rounded-xs text-[9px] font-bold transition-all ${language === 'bn' ? 'bg-accent text-bg shadow-lg shadow-accent/20' : 'bg-white/5 text-muted'}`}
-                    >
-                      বাংলা
-                    </button>
-                    <button 
-                      onClick={() => setLanguage('kb')}
-                      className={`flex-1 py-1.5 rounded-xs text-[9px] font-bold transition-all ${language === 'kb' ? 'bg-accent text-bg shadow-lg shadow-accent/20' : 'bg-white/5 text-muted'}`}
-                    >
-                      KOKBOROK
-                    </button>
-                  </div>
-                </div>
-                <div className="bg-[#151515] border border-border p-3 rounded-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
-                      <User size={20} />
-                    </div>
-                    <div>
-                      <div className="text-[11px] font-bold text-text">Dr. S. K. Roy</div>
-                      <div className="text-[8px] text-muted uppercase tracking-wider">Medical Officer (MO-IC)</div>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex gap-2">
-                    <button className="flex-1 bg-accent/10 border border-accent/20 py-1 rounded-xs text-[8px] font-bold text-accent">CALL</button>
-                    <button className="flex-1 bg-white/5 border border-border py-1 rounded-xs text-[8px] font-bold text-muted">MESSAGE</button>
+                <div className="bg-white/5 backdrop-blur-2xl border border-white/10 p-5 rounded-[28px] shadow-xl" role="listitem">
+                  <div id="language-label" className="text-[10px] text-white/50 uppercase font-bold mb-4 tracking-widest">Interface Language</div>
+                  <div className="flex gap-3" role="radiogroup" aria-labelledby="language-label">
+                  <button 
+                    onClick={() => {
+                      triggerHaptic(40);
+                      setLanguage('bn');
+                    }}
+                    role="radio"
+                    aria-checked={language === 'bn'}
+                    className={`flex-1 py-3 rounded-2xl text-[12px] font-black transition-all ${language === 'bn' ? 'bg-accent text-bg shadow-xl shadow-accent/20' : 'bg-white/5 backdrop-blur-md text-white/40 border border-white/10 shadow-inner'}`}
+                  >
+                    বাংলা
+                  </button>
+                  <button 
+                    onClick={() => {
+                      triggerHaptic(40);
+                      setLanguage('kb');
+                    }}
+                    role="radio"
+                    aria-checked={language === 'kb'}
+                    className={`flex-1 py-3 rounded-2xl text-[12px] font-black transition-all ${language === 'kb' ? 'bg-accent text-bg shadow-xl shadow-accent/20' : 'bg-white/5 backdrop-blur-md text-white/40 border border-white/10 shadow-inner'}`}
+                  >
+                    KOKBOROK
+                  </button>
                   </div>
                 </div>
 
-                <div className="text-[8px] text-muted uppercase tracking-widest mt-4 mb-2">Other ASHA Workers</div>
-                <div className="space-y-2">
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[32px] group shadow-xl" role="listitem">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-accent/20 backdrop-blur-md flex items-center justify-center text-accent border border-accent/20 shadow-inner">
+                      <User size={28} />
+                    </div>
+                    <div>
+                      <div className="text-[16px] font-black text-white tracking-tight">Dr. S. K. Roy</div>
+                      <div className="text-[10px] text-accent font-bold uppercase tracking-widest">Medical Officer (MO-IC)</div>
+                    </div>
+                  </div>
+                   <div className="mt-5 flex gap-3">
+                    <button className="flex-1 bg-accent text-bg font-black py-3 rounded-2xl text-[11px] shadow-lg shadow-accent/20 active:scale-95 transition-transform uppercase tracking-wider" onClick={() => triggerHaptic(20)}>Call Now</button>
+                    <button className="flex-1 bg-white/10 backdrop-blur-md border border-white/10 py-3 rounded-2xl text-[11px] font-bold text-white active:scale-95 transition-colors uppercase tracking-wider" onClick={() => triggerHaptic(15)}>Message</button>
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-accent font-bold uppercase tracking-widest mt-8 mb-4 flex items-center gap-2">
+                  <Users size={14} /> Other ASHA Workers
+                </div>
+                <div className="space-y-3">
                   {[
                     { name: 'Priya Debbarma', role: 'ASHA (Sector 1)' },
                     { name: 'Rita Reang', role: 'ASHA (Sector 3)' },
                     { name: 'Sumita Das', role: 'ASHA (Sector 2)' },
                   ].map((person, i) => (
-                    <div key={i} className="bg-[#151515] border border-border p-2 rounded-sm flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-muted">
+                    <div key={i} className="group bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-[24px] flex items-center justify-between hover:bg-white/10 transition-all cursor-pointer shadow-lg shadow-black/20">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[14px] text-white font-bold border border-white/10">
                           {person.name[0]}
                         </div>
                         <div>
-                          <div className="text-[9px] font-bold text-text">{person.name}</div>
-                          <div className="text-[7px] text-muted">{person.role}</div>
+                          <div className="text-[14px] font-bold text-white tracking-tight">{person.name}</div>
+                          <div className="text-[10px] text-white/40 font-medium">{person.role}</div>
                         </div>
                       </div>
-                      <Phone size={10} className="text-accent cursor-pointer" />
+                      <div className="w-8 h-8 rounded-full bg-accent/20 backdrop-blur-md flex items-center justify-center text-accent hover:bg-accent hover:text-bg transition-colors shadow-inner" onClick={(e) => {
+                        e.stopPropagation();
+                        triggerHaptic(20);
+                      }}>
+                        <Phone size={14} />
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="text-[8px] text-muted uppercase tracking-widest mt-6 mb-2">System Health (Offline)</div>
-                <div className="bg-[#151515] border border-border p-3 rounded-sm space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] text-muted">Local Database</span>
-                    <span className="text-[9px] text-accent font-bold">ACTIVE (SQLite)</span>
+                <div className="text-[11px] text-accent font-bold uppercase tracking-widest mt-10 mb-4 flex items-center gap-2">
+                  <Activity size={14} /> System Health (Offline)
+                </div>
+                <div className="bg-black/40 backdrop-blur-3xl border border-white/10 p-6 rounded-[32px] space-y-4 shadow-2xl border-t-white/20 border-l-white/20">
+                  <div className="flex justify-between items-center bg-white/5 backdrop-blur-md p-3 rounded-2xl border border-white/5">
+                    <span className="text-[11px] text-white/40 font-medium">Local Database</span>
+                    <span className="text-[11px] text-accent font-black tracking-tighter">ACTIVE (SQLite)</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] text-muted">AI Model Ver.</span>
-                    <span className="text-[9px] text-accent font-bold">v2.4.1 (On-Device)</span>
+                  <div className="flex justify-between items-center bg-white/5 backdrop-blur-md p-3 rounded-2xl border border-white/5">
+                    <span className="text-[11px] text-white/40 font-medium">Edge AI Model</span>
+                    <span className="text-[11px] text-accent font-black tracking-tighter">v2.4.1 Production</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] text-muted">Storage Used</span>
-                    <span className="text-[9px] text-text font-bold">142.8 MB / 2.0 GB</span>
+                  <div className="flex justify-between items-center bg-white/5 backdrop-blur-md p-3 rounded-2xl border border-white/5">
+                    <span className="text-[11px] text-white/40 font-medium">Storage Used</span>
+                    <span className="text-[11px] text-white font-black tracking-tighter">142.8 MB / 2.0 GB</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] text-muted">Offline Map</span>
-                    <span className="text-[9px] text-accent font-bold">Majlishpur (Sector 2)</span>
-                  </div>
-                  <div className="pt-2 border-t border-border/50">
-                    <div className="text-[7px] text-accent/60 font-mono uppercase tracking-tighter">Encrypted with AES-256 · DPDPA Compliant</div>
+                  <div className="flex justify-between items-center bg-white/5 backdrop-blur-md p-3 rounded-2xl border border-white/5">
+                    <span className="text-[11px] text-white/40 font-medium">Encryption</span>
+                    <span className="text-[11px] text-accent font-black tracking-tighter">AES-256 Enabled</span>
                   </div>
                 </div>
               </div>
@@ -584,48 +766,54 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -20, opacity: 0 }}
-              className="space-y-4"
+              className="space-y-8 pb-32"
             >
-              <div className="text-[10px] text-muted uppercase tracking-widest">{t.patientRegistration}</div>
+              <div className="mb-4">
+                <div className="text-[10px] text-accent font-bold uppercase tracking-[0.2em] mb-1">{t.patientRegistration}</div>
+                <div className="text-2xl font-sans font-black text-white tracking-tighter">Onboarding</div>
+              </div>
               
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className={`${fullScreen ? 'text-xs' : 'text-[8px]'} text-muted uppercase`}>{t.fullName}</label>
-                    <input type="text" className={`w-full bg-[#151515] border border-border rounded-sm text-text ${fullScreen ? 'p-4 text-base' : 'p-2 text-[10px]'}`} placeholder="..." />
+              <div className="space-y-8">
+                <div className="space-y-3">
+                  <label className={`${fullScreen ? 'text-xs' : 'text-[10px]'} text-accent font-black uppercase tracking-widest ml-1`}>{t.fullName}</label>
+                  <input type="text" className={`w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-white outline-none focus:border-accent/40 focus:bg-white/10 transition-all shadow-inner ${fullScreen ? 'p-6 text-xl' : 'p-4 text-[14px]'}`} placeholder="Enter patient name..." />
+                </div>
+                <div className="space-y-3">
+                  <label className={`${fullScreen ? 'text-xs' : 'text-[10px]'} text-accent font-black uppercase tracking-widest ml-1`}>{t.aadhar}</label>
+                  <input type="text" className={`w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-white outline-none focus:border-accent/40 focus:bg-white/10 transition-all shadow-inner ${fullScreen ? 'p-6 text-xl' : 'p-4 text-[14px]'}`} placeholder="XXXX XXXX XXXX" />
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className={`${fullScreen ? 'text-xs' : 'text-[10px]'} text-accent font-black uppercase tracking-widest ml-1`}>{t.age}</label>
+                    <input type="number" className={`w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-white outline-none focus:border-accent/40 focus:bg-white/10 transition-all shadow-inner ${fullScreen ? 'p-6 text-xl' : 'p-4 text-[14px]'}`} />
                   </div>
-                  <div className="space-y-2">
-                    <label className={`${fullScreen ? 'text-xs' : 'text-[8px]'} text-muted uppercase`}>{t.aadhar}</label>
-                    <input type="text" className={`w-full bg-[#151515] border border-border rounded-sm text-text ${fullScreen ? 'p-4 text-base' : 'p-2 text-[10px]'}`} placeholder="XXXX XXXX XXXX" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className={`${fullScreen ? 'text-xs' : 'text-[8px]'} text-muted uppercase`}>{t.age}</label>
-                      <input type="number" className={`w-full bg-[#151515] border border-border rounded-sm text-text ${fullScreen ? 'p-4 text-base' : 'p-2 text-[10px]'}`} />
-                    </div>
-                    <div className="space-y-2">
-                      <label className={`${fullScreen ? 'text-xs' : 'text-[8px]'} text-muted uppercase`}>{t.gender}</label>
-                      <select className={`w-full bg-[#151515] border border-border rounded-sm text-text focus:outline-none ${fullScreen ? 'p-4 text-base' : 'p-2 text-[10px]'}`}>
-                        <option>{t.male}</option>
-                        <option>{t.female}</option>
-                      </select>
-                    </div>
+                  <div className="space-y-3">
+                    <label className={`${fullScreen ? 'text-xs' : 'text-[10px]'} text-accent font-black uppercase tracking-widest ml-1`}>{t.gender}</label>
+                    <select className={`w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-white outline-none focus:border-accent/40 focus:bg-white/10 transition-all shadow-inner ${fullScreen ? 'p-6 text-xl' : 'p-4 text-[14px]'}`}>
+                      <option>{t.male}</option>
+                      <option>{t.female}</option>
+                    </select>
                   </div>
                 </div>
+              </div>
 
-              <div className="bg-accent/5 border border-dashed border-accent/30 p-4 rounded-sm flex flex-col items-center gap-2 cursor-pointer hover:bg-accent/10 transition-colors">
-                <Camera size={20} className="text-accent" />
-                <span className="text-[9px] text-accent font-bold uppercase">Take Photo</span>
+              <div className="group bg-white/5 backdrop-blur-xl border border-dashed border-white/20 p-8 rounded-[32px] flex flex-col items-center gap-4 cursor-pointer hover:bg-white/10 transition-all hover:border-accent/40 shadow-inner">
+                <div className="w-16 h-16 rounded-2xl bg-accent/20 backdrop-blur-md flex items-center justify-center text-accent group-hover:scale-110 transition-transform shadow-lg border border-accent/20">
+                  <Camera size={32} />
+                </div>
+                <span className="text-[12px] text-white/50 font-black uppercase tracking-widest group-hover:text-accent transition-colors">Capture Identity Photo</span>
               </div>
 
               <button 
                 onClick={() => {
+                  triggerHaptic([40, 20, 40]);
                   setPendingRecords(prev => prev + 1);
                   triggerToast(t.savedToLocal);
                   setScreen('home');
                 }}
-                className="w-full bg-accent text-bg font-bold py-3 rounded-sm text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                className="w-full bg-accent text-bg font-black py-4 rounded-[24px] text-[15px] flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(61,220,132,0.3)] active:scale-95 transition-all uppercase tracking-tight"
               >
-                <Save size={14} /> {t.saveRecord}
+                <Save size={18} /> {t.saveRecord}
               </button>
             </motion.div>
           )}
@@ -636,98 +824,128 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -20, opacity: 0 }}
-              className="space-y-4"
+              className="space-y-8 pb-32"
             >
-              <div className="text-[10px] text-muted uppercase tracking-widest">{t.screeningTitle}</div>
+              <div className="mb-4">
+                <div className="text-[10px] text-accent font-bold uppercase tracking-[0.2em] mb-1">{t.screeningTitle}</div>
+                <div className="text-2xl font-sans font-black text-white tracking-tighter">Clinical Edge AI</div>
+              </div>
               
-              <div className="bg-[#151515] border border-border p-3 rounded-sm">
-                <p className="text-[10px] text-text mb-3">{t.coughQuestion}</p>
-                <div className="flex gap-2">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-[32px] space-y-6 shadow-xl border-t-white/20 border-l-white/20">
+                <p className="text-[15px] font-medium text-white tracking-tight leading-snug">{t.coughQuestion}</p>
+                <div className="flex gap-3">
                   <button 
-                    onClick={() => setSymptoms(prev => ({ ...prev, cough: true }))}
-                    className={`flex-1 border py-2 rounded-sm text-[10px] font-bold transition-all ${symptoms.cough === true ? 'bg-accent border-accent text-bg' : 'bg-accent/10 border-accent/20 text-accent'}`}
+                    onClick={() => {
+                      triggerHaptic(10);
+                      setSymptoms(prev => ({ ...prev, cough: true }));
+                    }}
+                    className={`flex-1 py-4 rounded-2xl text-[14px] font-black transition-all active:scale-95 ${symptoms.cough === true ? 'bg-accent text-bg shadow-lg shadow-accent/20' : 'bg-white/5 backdrop-blur-md text-white/40 border border-white/10 shadow-inner'}`}
                   >
                     {t.yes}
                   </button>
                   <button 
-                    onClick={() => setSymptoms(prev => ({ ...prev, cough: false }))}
-                    className={`flex-1 border py-2 rounded-sm text-[10px] font-bold transition-all ${symptoms.cough === false ? 'bg-white/10 border-white/20 text-text' : 'bg-white/5 border-border text-muted'}`}
+                    onClick={() => {
+                      triggerHaptic(10);
+                      setSymptoms(prev => ({ ...prev, cough: false }));
+                    }}
+                    className={`flex-1 py-4 rounded-2xl text-[14px] font-black transition-all active:scale-95 ${symptoms.cough === false ? 'bg-white/20 backdrop-blur-md text-white shadow-inner' : 'bg-white/5 backdrop-blur-md text-white/40 border border-white/10 shadow-inner'}`}
                   >
                     {t.no}
                   </button>
                 </div>
               </div>
 
-              <div className="bg-[#151515] border border-border p-3 rounded-sm">
-                <p className="text-[10px] text-text mb-3">{t.feverQuestion}</p>
-                <div className="flex gap-2">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-[32px] space-y-6 shadow-xl border-t-white/20 border-l-white/20">
+                <p className="text-[15px] font-medium text-white tracking-tight leading-snug">{t.feverQuestion}</p>
+                <div className="flex gap-3">
                   <button 
-                    onClick={() => setSymptoms(prev => ({ ...prev, fever: true }))}
-                    className={`flex-1 border py-2 rounded-sm text-[10px] font-bold transition-all ${symptoms.fever === true ? 'bg-accent border-accent text-bg' : 'bg-accent/10 border-accent/20 text-accent'}`}
+                    onClick={() => {
+                      triggerHaptic(10);
+                      setSymptoms(prev => ({ ...prev, fever: true }));
+                    }}
+                    className={`flex-1 py-4 rounded-2xl text-[14px] font-black transition-all active:scale-95 ${symptoms.fever === true ? 'bg-accent text-bg shadow-lg shadow-accent/20' : 'bg-white/5 backdrop-blur-md text-white/40 border border-white/10 shadow-inner'}`}
                   >
                     {t.yes}
                   </button>
                   <button 
-                    onClick={() => setSymptoms(prev => ({ ...prev, fever: false }))}
-                    className={`flex-1 border py-2 rounded-sm text-[10px] font-bold transition-all ${symptoms.fever === false ? 'bg-white/10 border-white/20 text-text' : 'bg-white/5 border-border text-muted'}`}
+                    onClick={() => {
+                      triggerHaptic(10);
+                      setSymptoms(prev => ({ ...prev, fever: false }));
+                    }}
+                    className={`flex-1 py-4 rounded-2xl text-[14px] font-black transition-all active:scale-95 ${symptoms.fever === false ? 'bg-white/20 backdrop-blur-md text-white shadow-inner' : 'bg-white/5 backdrop-blur-md text-white/40 border border-white/10 shadow-inner'}`}
                   >
                     {t.no}
                   </button>
                 </div>
               </div>
 
-              <div className={`p-4 bg-[#151515] border border-border rounded-sm relative overflow-hidden ${fullScreen ? 'mb-8' : 'mb-4'}`}>
+              <div className={`p-8 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[32px] relative overflow-hidden shadow-2xl ${fullScreen ? 'mb-12' : 'mb-6'}`}>
                 {isAnalyzing && (
                   <motion.div 
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={{ duration: 2.5, ease: "linear" }}
-                    className="absolute top-0 left-0 right-0 h-1 bg-accent origin-left z-20"
+                    className="absolute top-0 left-0 right-0 h-1.5 bg-accent origin-left z-20"
                   />
                 )}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Activity size={fullScreen ? 18 : 12} className={isAnalyzing ? "text-accent animate-pulse" : "text-muted"} />
-                    <span className={`${fullScreen ? 'text-xs' : 'text-[9px]'} font-bold text-muted uppercase`}>Edge AI Status</span>
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-accent/20 backdrop-blur-md flex items-center justify-center border border-accent/20 shadow-inner">
+                      <Cpu size={24} className={isAnalyzing ? "text-accent animate-spin" : "text-white/40"} />
+                    </div>
+                    <span className={`${fullScreen ? 'text-sm' : 'text-[11px]'} font-black text-white/40 uppercase tracking-widest`}>Risk Assessment</span>
                   </div>
-                  {isAnalyzing && <span className={`${fullScreen ? 'text-sm' : 'text-[7px]'} text-accent font-mono animate-pulse uppercase`}>Analyzing Data...</span>}
+                  {isAnalyzing && (
+                    <motion.span 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, 1, 0.5, 1] }}
+                      transition={{ repeat: Infinity, duration: 1.5 }}
+                      className={`${fullScreen ? 'text-sm' : 'text-[9px]'} text-accent font-mono font-bold uppercase tracking-tighter`}
+                    >
+                      Inferencing...
+                    </motion.span>
+                  )}
                 </div>
                 
-                <div className="space-y-3 pt-1">
-                  <div className="flex justify-between items-center">
-                    <span className={`${fullScreen ? 'text-base' : 'text-[10px]'} text-text`}>{t.riskScore}</span>
-                    <span className={`font-black ${fullScreen ? 'text-2xl' : 'text-[11px]'} ${calculateRisk() > 60 ? 'text-red-500' : calculateRisk() > 0 ? 'text-yellow-500' : 'text-accent'}`}>
+                <div className="space-y-6 pt-1">
+                  <div className="flex justify-between items-end">
+                    <span className={`${fullScreen ? 'text-lg' : 'text-[13px]'} text-white font-medium tracking-tight`}>{t.riskScore}</span>
+                    <span className={`font-black ${fullScreen ? 'text-5xl' : 'text-3xl'} tracking-tight ${calculateRisk() > 60 ? 'text-red-500' : calculateRisk() > 0 ? 'text-yellow-500' : 'text-accent'}`}>
                       {isAnalyzing ? '--%' : `${calculateRisk()}%`}
                     </span>
                   </div>
-                  <div className={`bg-white/5 rounded-full overflow-hidden ${fullScreen ? 'h-3' : 'h-1'}`}>
+                  <div className={`bg-white/5 rounded-full overflow-hidden border border-white/5 ${fullScreen ? 'h-4' : 'h-2'}`}>
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: isAnalyzing ? 0 : `${calculateRisk()}%` }}
-                      className={`h-full transition-all duration-1000 ${calculateRisk() > 60 ? 'bg-red-500' : 'bg-accent'}`}
+                      className={`h-full transition-all duration-1000 ${calculateRisk() > 60 ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-accent shadow-[0_0_20px_rgba(61,220,132,0.4)]'}`}
                     />
                   </div>
                 </div>
-                <div className={`mt-3 font-mono uppercase tracking-widest text-center text-muted ${fullScreen ? 'text-[10px]' : 'text-[6px]'}`}>
-                  Local Inference (No cloud processing required)
+                <div className={`mt-6 font-mono uppercase tracking-[0.3em] text-center text-white/20 font-bold ${fullScreen ? 'text-[11px]' : 'text-[8px]'}`}>
+                  Secure Neural Engine Processing
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button 
-                  onClick={handleAnalyze}
+                  onClick={() => {
+                    triggerHaptic(20);
+                    handleAnalyze();
+                  }}
                   disabled={isAnalyzing || symptoms.cough === null || symptoms.fever === null}
-                  className="flex-[2] bg-accent/20 border border-accent/40 text-accent font-bold py-3 rounded-sm text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-30"
+                  className="flex-[2] bg-white/5 border border-white/10 text-white font-black py-4 rounded-[24px] text-[13px] flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-20 uppercase tracking-tight"
                 >
-                  <Cpu size={14} className={isAnalyzing ? "animate-spin" : ""} /> 
-                  {isAnalyzing ? 'Processing...' : 'Run Edge AI Analysis'}
+                  <Cpu size={18} className={isAnalyzing ? "animate-spin" : ""} /> 
+                  {isAnalyzing ? 'Processing...' : 'Run Bio-AI Analysis'}
                 </button>
                 <button 
                    onClick={() => {
+                    triggerHaptic(10);
                     setScreen('home');
                     setSymptoms({ cough: null, fever: null });
                   }}
-                  className="flex-1 bg-white/5 border border-border text-muted font-bold py-3 rounded-sm text-[10px] active:scale-95"
+                  className="flex-1 bg-white/5 border border-white/10 text-white/40 font-black py-4 rounded-[24px] text-[13px] active:scale-95 uppercase tracking-tight"
                 >
                   Reset
                 </button>
@@ -735,12 +953,13 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
 
               <button 
                 onClick={() => {
-                  triggerToast('Referral Generated');
+                  triggerHaptic([40, 20, 60]);
+                  triggerToast('Referral Protocol Initiated');
                   setScreen('home');
                   setSymptoms({ cough: null, fever: null });
                 }}
                 disabled={isAnalyzing || calculateRisk() === 0}
-                className="w-full bg-accent text-bg font-bold py-3 rounded-sm text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform uppercase disabled:opacity-50"
+                className="w-full bg-accent text-bg font-black py-5 rounded-[28px] text-[16px] flex items-center justify-center gap-3 shadow-[0_24px_48px_rgba(61,220,132,0.3)] active:scale-95 transition-all uppercase tracking-tight disabled:opacity-20"
               >
                 {t.generateReferral}
               </button>
@@ -750,41 +969,40 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
       </div>
 
       {/* Navigation Bar */}
-      <div className={`absolute bottom-0 left-0 right-0 bg-[#151515] border-t border-border flex justify-around items-center z-20 ${
-        fullScreen ? 'h-20 px-10' : 'h-12 px-4'
-      }`}>
-        <div 
-          onClick={() => setScreen('home')}
-          className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${screen === 'home' ? 'text-accent' : 'text-muted'}`}
-        >
-          <Activity size={fullScreen ? 24 : 16} />
-          <span className={`${fullScreen ? 'text-[10px]' : 'text-[7px]'} uppercase font-bold`}>{t.home}</span>
-        </div>
-        <div 
-          onClick={() => setScreen('patients')}
-          className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${screen === 'patients' ? 'text-accent' : 'text-muted'}`}
-        >
-          <Users size={fullScreen ? 24 : 16} />
-          <span className={`${fullScreen ? 'text-[10px]' : 'text-[7px]'} uppercase font-bold`}>{t.patients}</span>
-        </div>
-        <div 
-          onClick={() => setScreen('alerts')}
-          className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${screen === 'alerts' ? 'text-accent' : 'text-muted'}`}
-        >
-          <Bell size={fullScreen ? 24 : 16} />
-          <span className={`${fullScreen ? 'text-[10px]' : 'text-[7px]'} uppercase font-bold`}>{t.alerts}</span>
-        </div>
-        <div 
-          onClick={() => setScreen('people')}
-          className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${screen === 'people' ? 'text-accent' : 'text-muted'}`}
-        >
-          <User size={fullScreen ? 24 : 16} />
-          <span className={`${fullScreen ? 'text-[10px]' : 'text-[7px]'} uppercase font-bold`}>{t.people}</span>
-        </div>
+      <div className={`absolute bottom-6 left-6 right-6 backdrop-blur-[40px] bg-white/5 border border-white/20 rounded-[32px] flex justify-around items-center z-50 shadow-[0_20px_60px_rgba(0,0,0,0.6)] border-t-white/30 border-l-white/30 ${
+        fullScreen ? 'h-24 px-12' : 'h-16 px-6'
+      }`} role="navigation" aria-label="App Navigation">
+        {[
+          { id: 'home', icon: Activity, label: t.home },
+          { id: 'patients', icon: Users, label: t.patients },
+          { id: 'alerts', icon: Bell, label: t.alerts },
+          { id: 'people', icon: User, label: t.people }
+        ].map((item) => (
+          <button 
+            key={item.id}
+            onClick={() => {
+              triggerHaptic(15);
+              setScreen(item.id);
+            }}
+            aria-label={item.label}
+            aria-current={screen === item.id ? 'page' : undefined}
+            className={`relative flex flex-col items-center gap-1 transition-all duration-300 ${screen === item.id ? 'text-accent' : 'text-white/40 hover:text-white/60'}`}
+          >
+            {screen === item.id && (
+              <motion.div 
+                layoutId="nav-bg"
+                className="absolute -inset-x-4 -inset-y-2 bg-accent/10 rounded-2xl -z-10"
+                transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
+              />
+            )}
+            <item.icon size={fullScreen ? 28 : 20} className={screen === item.id ? 'scale-110 drop-shadow-[0_0_8px_rgba(61,220,132,0.4)]' : ''} />
+            <span className={`${fullScreen ? 'text-[12px]' : 'text-[8px]'} font-bold uppercase tracking-tight`}>{item.label}</span>
+          </button>
+        ))}
       </div>
 
-      {/* Android Home Bar */}
-      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-16 h-1 bg-white/20 rounded-full z-20" />
-    </div>
+      {/* iOS Home Indicator */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28 h-1.5 bg-white/10 rounded-full z-50" />
+    </motion.div>
   );
 };

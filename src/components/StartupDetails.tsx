@@ -14,6 +14,32 @@ import {
 import { motion } from 'motion/react';
 import { jsPDF } from 'jspdf';
 
+const Reveal: React.FC<{ children: React.ReactNode, delay?: number, perspective?: boolean }> = ({ children, delay = 0, perspective = true }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20, rotateX: perspective ? 8 : 0, perspective: 1000 }}
+    whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+  >
+    {children}
+  </motion.div>
+);
+
+const TiltCard: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className = "" }) => (
+  <motion.div
+    whileHover={{ 
+      rotateY: 4, 
+      rotateX: -4,
+      scale: 1.02,
+      z: 30
+    }}
+    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    className={`relative transform-gpu perspective-1000 ${className}`}
+  >
+    {children}
+  </motion.div>
+);
+
 export const StartupDetails = () => {
   const handleDownload = () => {
     const doc = new jsPDF();
@@ -100,28 +126,40 @@ export const StartupDetails = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border border border-border mb-16">
-            <div className="bg-card p-8">
-              <Target className="text-accent mb-4" size={24} />
-              <h4 className="text-lg font-serif font-bold mb-2">Our Vision</h4>
-              <p className="text-muted text-xs leading-relaxed">
-                To eliminate diagnostic delays in rural India through AI-driven, decentralized healthcare delivery systems that work anywhere, regardless of connectivity.
-              </p>
-            </div>
-            <div className="bg-card p-8">
-              <Shield className="text-accent mb-4" size={24} />
-              <h4 className="text-lg font-serif font-bold mb-2">Our Mission</h4>
-              <p className="text-muted text-xs leading-relaxed">
-                Empowering 1 Million+ frontline health workers with digital tools that bridge the gap between rural patients and tertiary care centers.
-              </p>
-            </div>
-            <div className="bg-card p-8">
-              <Globe className="text-accent mb-4" size={24} />
-              <h4 className="text-lg font-serif font-bold mb-2">Regional Focus</h4>
-              <p className="text-muted text-xs leading-relaxed">
-                Starting with Tripura, we aim to scale across the entire North Eastern Region (NER) of India, addressing unique geographical and logistical challenges.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <Reveal delay={0.1}>
+              <TiltCard>
+                <div className="bg-card/50 backdrop-blur-xl border border-white/10 p-8 rounded-[32px] h-full shadow-2xl">
+                  <Target className="text-accent mb-4" size={32} />
+                  <h4 className="text-2xl font-sans font-black mb-3">Our Vision</h4>
+                  <p className="text-white/40 text-[13px] leading-relaxed font-medium">
+                    To eliminate diagnostic delays in rural India through AI-driven, decentralized healthcare delivery systems that work anywhere, regardless of connectivity.
+                  </p>
+                </div>
+              </TiltCard>
+            </Reveal>
+            <Reveal delay={0.2}>
+              <TiltCard>
+                <div className="bg-card/50 backdrop-blur-xl border border-white/10 p-8 rounded-[32px] h-full shadow-2xl">
+                  <Shield className="text-accent mb-4" size={32} />
+                  <h4 className="text-2xl font-sans font-black mb-3">Our Mission</h4>
+                  <p className="text-white/40 text-[13px] leading-relaxed font-medium">
+                    Empowering 1 Million+ frontline health workers with digital tools that bridge the gap between rural patients and tertiary care centers.
+                  </p>
+                </div>
+              </TiltCard>
+            </Reveal>
+            <Reveal delay={0.3}>
+              <TiltCard>
+                <div className="bg-card/50 backdrop-blur-xl border border-white/10 p-8 rounded-[32px] h-full shadow-2xl">
+                  <Globe className="text-accent mb-4" size={32} />
+                  <h4 className="text-2xl font-sans font-black mb-3">Regional Focus</h4>
+                  <p className="text-white/40 text-[13px] leading-relaxed font-medium">
+                    Starting with Tripura, we aim to scale across the entire North Eastern Region (NER) of India, addressing unique geographical and logistical challenges.
+                  </p>
+                </div>
+              </TiltCard>
+            </Reveal>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -167,9 +205,13 @@ export const StartupDetails = () => {
                 <div className="pt-4 mt-4 border-t border-border/30">
                   <div className="text-[10px] text-muted uppercase tracking-widest mb-2">Follow Our Journey</div>
                   <div className="flex gap-4">
-                    {['LinkedIn', 'Twitter', 'Medium'].map(social => (
-                      <a key={social} href="#" className="text-[10px] text-accent hover:text-accent-light transition-colors font-bold uppercase tracking-widest">
-                        {social}
+                    {[
+                      { name: 'LinkedIn', url: 'https://www.linkedin.com/company/asha-setu/' },
+                      { name: 'Twitter', url: '#' },
+                      { name: 'Medium', url: '#' }
+                    ].map(social => (
+                      <a key={social.name} href={social.url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-accent hover:text-accent-light transition-colors font-bold uppercase tracking-widest">
+                        {social.name}
                       </a>
                     ))}
                   </div>

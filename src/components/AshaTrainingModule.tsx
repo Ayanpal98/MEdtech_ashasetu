@@ -104,19 +104,27 @@ export const AshaTrainingModule = () => {
 
         {/* Tab Switcher */}
         {!selectedModuleId && (
-          <div className="flex bg-surface border border-border p-1 rounded-sm">
+          <div className="flex bg-surface border border-border p-1 rounded-sm" role="tablist" aria-label="Training content tabs">
             <button 
+              role="tab"
+              aria-selected={activeTab === 'tutorials'}
+              aria-controls="tutorials-panel"
+              id="tutorials-tab"
               onClick={() => setActiveTab('tutorials')}
               className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'tutorials' ? 'bg-accent text-bg shadow-lg' : 'text-muted hover:text-text'}`}
             >
-              <PlayCircle size={14} />
+              <PlayCircle size={14} aria-hidden="true" />
               Tutorials
             </button>
             <button 
+              role="tab"
+              aria-selected={activeTab === 'faqs'}
+              aria-controls="faqs-panel"
+              id="faqs-tab"
               onClick={() => setActiveTab('faqs')}
               className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'faqs' ? 'bg-accent text-bg shadow-lg' : 'text-muted hover:text-text'}`}
             >
-              <HelpCircle size={14} />
+              <HelpCircle size={14} aria-hidden="true" />
               FAQs
             </button>
           </div>
@@ -128,30 +136,34 @@ export const AshaTrainingModule = () => {
           {selectedModule ? (
             <motion.div 
               key="module-detail"
+              id="module-detail-panel"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               className="bg-card border border-border p-8 rounded-sm relative overflow-hidden"
+              role="region"
+              aria-labelledby="module-title"
             >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" aria-hidden="true" />
               
               <button 
                 onClick={() => setSelectedModuleId(null)}
                 className="flex items-center gap-2 text-accent text-[10px] font-bold uppercase tracking-widest mb-8 hover:gap-3 transition-all group"
+                aria-label="Back to module list"
               >
-                <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+                <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" aria-hidden="true" /> 
                 Back to Modules
               </button>
               
               <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
                 <div className="w-16 h-16 rounded-sm bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                  <BookOpen size={32} />
+                  <BookOpen size={32} aria-hidden="true" />
                 </div>
                 <div>
-                  <h4 className="text-3xl font-serif font-bold text-text mb-1">{selectedModule.title}</h4>
+                  <h4 id="module-title" className="text-3xl font-serif font-bold text-text mb-1">{selectedModule.title}</h4>
                   <div className="flex items-center gap-4 text-[10px] text-muted font-mono uppercase tracking-widest">
                     <span>{selectedModule.duration} MINS</span>
-                    <span className="w-1 h-1 rounded-full bg-border" />
+                    <span className="w-1 h-1 rounded-full bg-border" aria-hidden="true" />
                     <span className="text-accent">Core Certification Module</span>
                   </div>
                 </div>
@@ -212,13 +224,16 @@ export const AshaTrainingModule = () => {
           ) : activeTab === 'tutorials' ? (
             <motion.div 
               key="tutorials"
+              id="tutorials-panel"
+              role="tabpanel"
+              aria-labelledby="tutorials-tab"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className="space-y-8"
             >
               {/* Progress Indicator */}
-              <div className="bg-surface border border-border p-6 rounded-sm">
+              <div className="bg-surface border border-border p-6 rounded-sm" role="region" aria-label="Learning progress">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
                     <div className="text-[10px] font-bold text-text uppercase tracking-widest">Your Training Progress</div>
@@ -300,6 +315,9 @@ export const AshaTrainingModule = () => {
           ) : (
             <motion.div 
               key="faqs"
+              id="faqs-panel"
+              role="tabpanel"
+              aria-labelledby="faqs-tab"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -313,13 +331,19 @@ export const AshaTrainingModule = () => {
                   <button 
                     className="w-full p-5 text-left flex justify-between items-center hover:bg-white/5 transition-colors"
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    aria-expanded={openFaq === i}
+                    aria-controls={`faq-answer-${i}`}
+                    id={`faq-question-${i}`}
                   >
                     <span className="text-sm font-medium text-text pr-6">{faq.question}</span>
-                    {openFaq === i ? <ChevronUp size={16} className="text-accent" /> : <ChevronDown size={16} className="text-muted" />}
+                    {openFaq === i ? <ChevronUp size={16} className="text-accent" aria-hidden="true" /> : <ChevronDown size={16} className="text-muted" aria-hidden="true" />}
                   </button>
                   <AnimatePresence>
                     {openFaq === i && (
                       <motion.div
+                        id={`faq-answer-${i}`}
+                        role="region"
+                        aria-labelledby={`faq-question-${i}`}
                         initial={{ height: 0 }}
                         animate={{ height: 'auto' }}
                         exit={{ height: 0 }}

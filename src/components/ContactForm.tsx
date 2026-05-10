@@ -66,6 +66,8 @@ export const ContactForm = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className="bg-accent/10 border border-accent/20 p-8 rounded-sm text-center"
+            role="status"
+            aria-live="polite"
           >
             <div className="inline-flex items-center justify-center w-12 h-12 bg-accent rounded-full mb-4">
               <CheckCircle2 size={24} className="text-bg" />
@@ -97,9 +99,12 @@ export const ContactForm = () => {
                   onChange={handleChange}
                   className={`w-full bg-card border ${errors.name ? 'border-red-500/50' : 'border-border'} rounded-sm px-3 py-2 text-xs text-text focus:outline-none focus:border-accent/50 transition-colors`}
                   placeholder="John Doe"
+                  aria-required="true"
+                  aria-invalid={!!errors.name}
+                  aria-describedby={errors.name ? "name-error" : undefined}
                 />
                 {errors.name && (
-                  <div className="flex items-center gap-1.5 text-red-500 text-[9px] font-medium uppercase tracking-tighter">
+                  <div id="name-error" className="flex items-center gap-1.5 text-red-500 text-[9px] font-medium uppercase tracking-tighter" role="alert">
                     <AlertCircle size={10} /> {errors.name}
                   </div>
                 )}
@@ -116,9 +121,12 @@ export const ContactForm = () => {
                   onChange={handleChange}
                   className={`w-full bg-card border ${errors.email ? 'border-red-500/50' : 'border-border'} rounded-sm px-3 py-2 text-xs text-text focus:outline-none focus:border-accent/50 transition-colors`}
                   placeholder="john@example.com"
+                  aria-required="true"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
                 />
                 {errors.email && (
-                  <div className="flex items-center gap-1.5 text-red-500 text-[9px] font-medium uppercase tracking-tighter">
+                  <div id="email-error" className="flex items-center gap-1.5 text-red-500 text-[9px] font-medium uppercase tracking-tighter" role="alert">
                     <AlertCircle size={10} /> {errors.email}
                   </div>
                 )}
@@ -137,9 +145,12 @@ export const ContactForm = () => {
                 onChange={handleChange}
                 className={`w-full bg-card border ${errors.subject ? 'border-red-500/50' : 'border-border'} rounded-sm px-3 py-2 text-xs text-text focus:outline-none focus:border-accent/50 transition-colors`}
                 placeholder="Inquiry about MedTech Tripura"
+                aria-required="true"
+                aria-invalid={!!errors.subject}
+                aria-describedby={errors.subject ? "subject-error" : undefined}
               />
               {errors.subject && (
-                <div className="flex items-center gap-1.5 text-red-500 text-[9px] font-medium uppercase tracking-tighter">
+                <div id="subject-error" className="flex items-center gap-1.5 text-red-500 text-[9px] font-medium uppercase tracking-tighter" role="alert">
                   <AlertCircle size={10} /> {errors.subject}
                 </div>
               )}
@@ -157,9 +168,12 @@ export const ContactForm = () => {
                 onChange={handleChange}
                 className={`w-full bg-card border ${errors.message ? 'border-red-500/50' : 'border-border'} rounded-sm px-3 py-2 text-xs text-text focus:outline-none focus:border-accent/50 transition-colors resize-none`}
                 placeholder="How can we help you?"
+                aria-required="true"
+                aria-invalid={!!errors.message}
+                aria-describedby={errors.message ? "message-error" : undefined}
               />
               {errors.message && (
-                <div className="flex items-center gap-1.5 text-red-500 text-[9px] font-medium uppercase tracking-tighter">
+                <div id="message-error" className="flex items-center gap-1.5 text-red-500 text-[9px] font-medium uppercase tracking-tighter" role="alert">
                   <AlertCircle size={10} /> {errors.message}
                 </div>
               )}
