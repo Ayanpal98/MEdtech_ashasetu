@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AshaAppPreview } from '../components/AshaAppPreview';
+import { ThreeDLogo } from '../components/ThreeDLogo';
 
 const Reveal: React.FC<{ children: React.ReactNode, delay?: number, id?: string, className?: string, perspective?: boolean }> = ({ children, delay = 0, id, className, perspective = true }) => (
   <motion.div
@@ -106,7 +107,10 @@ export const AshaSetuPage = () => {
             <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-all">
               <ArrowLeft size={20} className="text-white" />
             </div>
-            <span className="font-sans text-[11px] font-black tracking-[0.2em] text-white/40 uppercase group-hover:text-white transition-colors">Back to System</span>
+            <div className="flex items-center gap-2">
+              <ThreeDLogo size={24} />
+              <span className="font-sans text-[11px] font-black tracking-[0.2em] text-white/40 uppercase group-hover:text-white transition-colors">Back to System</span>
+            </div>
           </Link>
           <div className="flex items-center gap-4 bg-accent/5 border border-accent/20 px-4 py-2 rounded-full shadow-[0_0_20px_rgba(61,220,132,0.1)]">
             <div className="w-2 h-2 bg-accent rounded-full animate-pulse shadow-[0_0_8px_rgba(61,220,132,0.8)]" />
@@ -236,6 +240,74 @@ export const AshaSetuPage = () => {
                     </p>
                   </div>
                 </TiltCard>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* App Tutorial / How it Works */}
+      <section className="py-24 md:py-40 bg-[#080808] relative px-6 md:px-10 border-y border-white/5 overflow-hidden">
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+        <div className="max-w-7xl mx-auto relative z-10">
+          <Reveal className="text-center mb-20">
+            <div className="font-sans text-[12px] text-accent font-black tracking-[0.3em] uppercase mb-4">
+              USER EXPERIENCE GUIDE
+            </div>
+            <h2 className="text-4xl md:text-6xl font-sans font-black tracking-tighter text-white mb-6">
+              Simple. Local. <span className="text-accent">Effective.</span>
+            </h2>
+            <p className="text-white/40 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+              We designed ASHASETU to be intuitive for everyone. Here is how it works on the ground, in just five simple steps.
+            </p>
+          </Reveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            {[
+              {
+                icon: <Globe size={32} />,
+                title: "Language First",
+                desc: "Choose between Bengali or Kokborok for an interface that feels like home.",
+                delay: 0
+              },
+              {
+                icon: <Database size={32} />,
+                title: "Register Offline",
+                desc: "Add patient details and Aadhar records even with zero internet bars.",
+                delay: 0.1
+              },
+              {
+                icon: <Activity size={32} />,
+                title: "Smart Screening",
+                desc: "Answer basic questions and let the built-in AI check for health risks.",
+                delay: 0.2
+              },
+              {
+                icon: <Zap size={32} />,
+                title: "One-Tap Sync",
+                desc: "When you get signal, the sync button sends all records to the cloud securely.",
+                delay: 0.3
+              },
+              {
+                icon: <ShieldCheck size={32} />,
+                title: "Expert Support",
+                desc: "Instantly call Medical Officers if the AI flags a critical emergency.",
+                delay: 0.4
+              }
+            ].map((step, i) => (
+              <Reveal key={i} delay={step.delay} className="relative group/step">
+                <div className="h-full bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-[32px] hover:bg-white/10 transition-all duration-500 hover:-translate-y-2 border-t-white/20 border-l-white/20 shadow-xl overflow-hidden">
+                  <div className="absolute -right-4 -top-4 text-7xl font-sans font-black text-white/5 group-hover/step:text-accent/5 transition-colors">
+                    0{i + 1}
+                  </div>
+                  <div className="w-14 h-14 rounded-2xl bg-accent/20 backdrop-blur-md flex items-center justify-center text-accent mb-8 shadow-lg border border-accent/20 group-hover/step:bg-accent group-hover/step:text-bg transition-colors">
+                    {step.icon}
+                  </div>
+                  <h3 className="text-lg font-black mb-4 tracking-tight text-white">{step.title}</h3>
+                  <p className="text-sm text-white/40 leading-relaxed font-medium">
+                    {step.desc}
+                  </p>
+                </div>
               </Reveal>
             ))}
           </div>

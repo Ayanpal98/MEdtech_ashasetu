@@ -23,6 +23,7 @@ import {
   Database
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { ThreeDLogo } from './ThreeDLogo';
 
 export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean }) => {
   const triggerHaptic = (pattern: number | number[] = 15) => {
@@ -388,10 +389,13 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               exit={{ x: 20, opacity: 0 }}
             >
               {/* Welcome Section */}
-              <div className="mb-10">
-                <div className={`${fullScreen ? 'text-sm' : 'text-[11px]'} text-accent font-bold uppercase tracking-[0.2em] mb-2`}>{t.welcome}</div>
-                <div className={`${fullScreen ? 'text-5xl' : 'text-3xl'} font-sans font-black text-white tracking-tighter`}>{t.ashaName}</div>
-                <div className={`${fullScreen ? 'text-lg' : 'text-[10px]'} text-white/40 font-medium mt-2`}>{t.sector}</div>
+              <div className="mb-10 flex justify-between items-start">
+                <div>
+                  <div className={`${fullScreen ? 'text-sm' : 'text-[11px]'} text-accent font-bold uppercase tracking-[0.2em] mb-2`}>{t.welcome}</div>
+                  <div className={`${fullScreen ? 'text-5xl' : 'text-3xl'} font-sans font-black text-white tracking-tighter`}>{t.ashaName}</div>
+                  <div className={`${fullScreen ? 'text-lg' : 'text-[10px]'} text-white/40 font-medium mt-2`}>{t.sector}</div>
+                </div>
+                <ThreeDLogo size={fullScreen ? 56 : 40} />
               </div>
 
               {/* Sync Pill */}

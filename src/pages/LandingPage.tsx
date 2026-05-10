@@ -21,6 +21,7 @@ import {
   Lock,
   X 
 } from 'lucide-react';
+import { ThreeDLogo } from '../components/ThreeDLogo';
 import { ParticleCanvas } from '../components/ParticleCanvas';
 import { DelayReductionChart } from '../components/DelayReductionChart';
 import { AshaAppPreview } from '../components/AshaAppPreview';
@@ -139,18 +140,21 @@ export const LandingPage = () => {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="fixed inset-0 bg-bg z-[9999] flex flex-col items-center justify-center gap-6"
+            className="fixed inset-0 bg-bg z-[9999] flex flex-col items-center justify-center gap-8"
           >
-            <div className="font-mono text-[13px] tracking-[0.2em] text-accent">MEDTECH TRIPURA</div>
-            <div className="w-[200px] h-[2px] bg-accent/15 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: '100%' }}
-                transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
-                className="h-full bg-linear-to-r from-accent to-accent-light"
-              />
+            <ThreeDLogo size={64} />
+            <div className="flex flex-col items-center gap-4">
+              <div className="font-mono text-[16px] font-black tracking-[0.3em] text-white">ASHSETU</div>
+              <div className="w-[240px] h-[3px] bg-accent/15 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
+                  className="h-full bg-linear-to-r from-accent to-accent-light shadow-[0_0_15px_rgba(61,220,132,0.8)]"
+                />
+              </div>
+              <div className="text-[10px] text-muted tracking-[0.2em] font-mono uppercase">Clinical Edge Intelligence Engine</div>
             </div>
-            <div className="text-[12px] text-muted tracking-[0.1em]">A VENTURE UNDER ATSFY TECHNOLOGIES</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -165,13 +169,16 @@ export const LandingPage = () => {
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-100 transition-all duration-300 ${isScrolled ? 'bg-bg/95 backdrop-blur-md border-b border-border py-3' : 'bg-transparent py-5'}`} aria-label="Main Navigation">
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2 group" aria-label="MedTech Tripura Home">
-            <span className="font-mono text-sm md:text-base font-bold text-text tracking-tighter">
-              MedTech<span className="text-accent">Tripura</span>
-            </span>
-            <span className="hidden sm:inline-block text-[10px] text-muted font-normal tracking-wide ml-1">
-              by ATSFY Technologies
-            </span>
+          <a href="#" className="flex items-center gap-3 group" aria-label="AshaSetu Home">
+            <ThreeDLogo size={32} />
+            <div className="flex flex-col">
+              <span className="font-mono text-sm md:text-base font-bold text-text tracking-tighter leading-none">
+                Asha<span className="text-accent">Setu</span>
+              </span>
+              <span className="text-[9px] text-muted font-normal tracking-[0.1em] uppercase mt-1">
+                Clinical Edge AI
+              </span>
+            </div>
           </a>
 
           <div className="hidden lg:flex items-center gap-1">
