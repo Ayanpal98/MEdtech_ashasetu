@@ -104,7 +104,7 @@ export const AshaTrainingModule = () => {
 
         {/* Tab Switcher */}
         {!selectedModuleId && (
-          <div className="flex bg-surface border border-border p-1 rounded-sm" role="tablist" aria-label="Training content tabs">
+          <div className="flex bg-bg border border-border p-1 rounded-sm" role="tablist" aria-label="Training content tabs">
             <button 
               role="tab"
               aria-selected={activeTab === 'tutorials'}
@@ -179,7 +179,7 @@ export const AshaTrainingModule = () => {
                   <h5 className="text-[10px] font-bold text-text uppercase tracking-widest mb-4 border-b border-border pb-2">Learning Objectives</h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {selectedModule.steps.map((step, i) => (
-                      <div key={i} className="flex items-start gap-3 p-3 bg-surface border border-border/50 rounded-xs">
+                      <div key={i} className="flex items-start gap-3 p-3 bg-surface/50 border border-border/50 rounded-xs">
                         <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0 mt-0.5">
                           <CheckCircle2 size={12} />
                         </div>
@@ -190,7 +190,7 @@ export const AshaTrainingModule = () => {
                 </div>
 
                 <div className="lg:col-span-2 space-y-6">
-                  <div className="bg-surface p-6 border border-border rounded-sm">
+                  <div className="bg-surface/50 p-6 border border-border rounded-sm">
                     <h5 className="text-[10px] font-bold text-text uppercase tracking-widest mb-6">Prerequisites</h5>
                     <div className="space-y-4">
                       <div className="flex items-center gap-3 text-xs text-muted">
@@ -233,7 +233,7 @@ export const AshaTrainingModule = () => {
               className="space-y-8"
             >
               {/* Progress Indicator */}
-              <div className="bg-surface border border-border p-6 rounded-sm" role="region" aria-label="Learning progress">
+              <div className="bg-surface/50 border border-border p-6 rounded-sm" role="region" aria-label="Learning progress">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
                     <div className="text-[10px] font-bold text-text uppercase tracking-widest">Your Training Progress</div>
@@ -329,7 +329,7 @@ export const AshaTrainingModule = () => {
                   className="bg-card border border-border rounded-sm overflow-hidden"
                 >
                   <button 
-                    className="w-full p-5 text-left flex justify-between items-center hover:bg-white/5 transition-colors"
+                    className="w-full p-5 text-left flex justify-between items-center hover:bg-surface/10 transition-colors"
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                     aria-expanded={openFaq === i}
                     aria-controls={`faq-answer-${i}`}
@@ -387,7 +387,7 @@ export const AshaTrainingModule = () => {
           </div>
         </div>
 
-        <div className="bg-surface p-8 border border-border rounded-sm">
+        <div className="bg-surface/50 p-8 border border-border rounded-sm">
           <h5 className="text-xs font-mono text-accent uppercase tracking-[0.2em] mb-4">Capacity Building Impact</h5>
           <div className="space-y-4">
             <div className="flex justify-between items-end">
@@ -417,7 +417,7 @@ export const AshaTrainingModule = () => {
         </div>
       </div>
 
-      <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-surface border border-border rounded-sm">
+      <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-surface/50 border border-border rounded-sm">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent">
             <MessageSquare size={24} />

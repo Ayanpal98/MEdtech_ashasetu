@@ -31,6 +31,7 @@ import { ContactForm } from '../components/ContactForm';
 import { DiseaseBurden } from '../components/DiseaseBurden';
 import { Roadmap3D } from '../components/Roadmap3D';
 import { Financials } from '../components/Financials';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { Link } from 'react-router-dom';
 
 const SectionLabel = ({ children, className = "", id }: { children: React.ReactNode, className?: string, id?: string }) => (
@@ -43,6 +44,33 @@ const SectionTitle = ({ children, className = "", id }: { children: React.ReactN
   <h2 id={id} className={`font-serif text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] mb-5 ${className}`}>
     {children}
   </h2>
+);
+
+const HeartbeatSmall = () => (
+  <div className="w-12 h-6 overflow-hidden hidden sm:block">
+    <svg width="48" height="24" viewBox="0 0 48 24">
+      <motion.path
+        d="M0 12 H10 L14 4 L18 20 L22 0 L26 24 L30 12 H48"
+        fill="none"
+        stroke="var(--color-accent)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ 
+          pathLength: [0, 1, 1],
+          opacity: [0, 1, 0],
+          x: [0, 0, 0]
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          times: [0, 0.4, 1],
+          ease: "easeInOut"
+        }}
+      />
+    </svg>
+  </div>
 );
 
 const HeartbeatBackground = () => (
@@ -144,13 +172,13 @@ export const LandingPage = () => {
           >
             <ThreeDLogo size={64} />
             <div className="flex flex-col items-center gap-4">
-              <div className="font-mono text-[16px] font-black tracking-[0.3em] text-white">ASHSETU</div>
+              <div className="font-mono text-[16px] font-black tracking-[0.3em] text-text">ASHSETU</div>
               <div className="w-[240px] h-[3px] bg-accent/15 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: '100%' }}
                   transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
-                  className="h-full bg-linear-to-r from-accent to-accent-light shadow-[0_0_15px_rgba(61,220,132,0.8)]"
+                  className="h-full bg-linear-to-r from-accent to-accent-light"
                 />
               </div>
               <div className="text-[10px] text-muted tracking-[0.2em] font-mono uppercase">Clinical Edge Intelligence Engine</div>
@@ -167,13 +195,14 @@ export const LandingPage = () => {
       />
 
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-100 transition-all duration-300 ${isScrolled ? 'bg-bg/95 backdrop-blur-md border-b border-border py-3' : 'bg-transparent py-5'}`} aria-label="Main Navigation">
+      <nav className={`fixed top-0 left-0 right-0 z-100 transition-all duration-300 ${isScrolled ? 'bg-surface/80 backdrop-blur-md border-b border-border shadow-sm py-3' : 'bg-transparent py-5'}`} aria-label="Main Navigation">
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
           <a href="#" className="flex items-center gap-3 group" aria-label="AshaSetu Home">
             <ThreeDLogo size={32} />
             <div className="flex flex-col">
-              <span className="font-mono text-sm md:text-base font-bold text-text tracking-tighter leading-none">
+              <span className="font-mono text-sm md:text-base font-bold text-text tracking-tighter leading-none flex items-center gap-2">
                 Asha<span className="text-accent">Setu</span>
+                <HeartbeatSmall />
               </span>
               <span className="text-[9px] text-muted font-normal tracking-[0.1em] uppercase mt-1">
                 Clinical Edge AI
@@ -186,27 +215,31 @@ export const LandingPage = () => {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-[12px] font-medium text-muted hover:text-text hover:bg-white/5 px-3 py-2 rounded-sm transition-colors"
+                className="text-[12px] font-medium text-muted hover:text-text hover:bg-surface/5 px-3 py-2 rounded-sm transition-colors"
               >
                 {link.name}
               </a>
             ))}
             <a
               href="#contacts"
-              className="text-[12px] font-medium bg-accent/10 border border-accent/25 text-accent hover:bg-accent/20 px-4 py-2 rounded-sm transition-all ml-2"
+              className="text-[12px] font-medium bg-accent/10 border border-accent/25 text-accent hover:bg-accent/20 px-4 py-2 rounded-sm transition-all ml-2 mr-4"
             >
               Key Contacts
             </a>
+            <ThemeToggle className="scale-75 origin-right" />
           </div>
 
-          <button
-            className="lg:hidden p-2 text-text"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-expanded={isMenuOpen}
-            aria-label="Toggle navigation menu"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex items-center gap-4 lg:hidden">
+            <ThemeToggle className="scale-75" />
+            <button
+              className="p-2 text-text"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-expanded={isMenuOpen}
+              aria-label="Toggle navigation menu"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -291,7 +324,7 @@ export const LandingPage = () => {
               { num: '8', label: 'Northeast states sharing the same structural healthcare gap' }
             ].map((stat, i) => (
               <Reveal key={i} delay={1 + i * 0.1} className="relative z-10">
-                <TiltCard className="bg-card border border-border p-7 h-full overflow-hidden group hover:border-accent/40 hover:bg-white/5 transition-colors">
+                <TiltCard className="glass-card p-7 h-full overflow-hidden group hover:border-accent/40 transition-all cursor-pointer three-d-shadow hover:-translate-y-1">
                   <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-accent to-transparent" />
                   <div className="text-3xl md:text-4xl font-serif font-black text-accent mb-2">{stat.num}</div>
                   <div className="text-[11px] text-muted leading-tight uppercase tracking-wider">{stat.label}</div>
@@ -304,14 +337,40 @@ export const LandingPage = () => {
       </section>
 
       {/* Thesis Section */}
-      <section className="bg-linear-to-br from-card to-[#0d1a10] border-y border-border py-16 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 flex flex-col md:flex-row items-center gap-10 md:gap-20">
-          <div className="font-mono text-[10px] tracking-[0.2em] text-gold uppercase md:rotate-180 md:[writing-mode:vertical-rl]">
-            Key Thesis
+      <section className="relative py-24 overflow-hidden border-y border-border z-10">
+        <div className="absolute inset-0 bg-linear-to-br from-surface to-bg dark:from-surface/20 dark:to-bg opacity-50" />
+        <HeartbeatBackground />
+        
+        <div className="max-w-7xl mx-auto px-6 md:px-10 relative z-10">
+          <div className="flex flex-col md:flex-row items-center gap-12 md:gap-24">
+            <Reveal perspective={false}>
+              <div className="font-mono text-[11px] font-black tracking-[0.3em] text-accent uppercase md:rotate-180 md:[writing-mode:vertical-rl] flex items-center gap-4">
+                <span className="w-8 h-px bg-accent md:w-px md:h-8" />
+                Key Thesis
+              </div>
+            </Reveal>
+            
+            <div className="relative">
+              <span className="absolute -top-12 -left-8 text-8xl font-serif text-accent/10 pointer-events-none select-none" aria-hidden="true">
+                &ldquo;
+              </span>
+              
+              <Reveal delay={0.2}>
+                <blockquote className="font-serif text-2xl md:text-4xl leading-relaxed italic text-text">
+                  The most solvable MedTech problem in Tripura is not a technology problem &mdash; it is a{" "}
+                  <mark className="bg-transparent text-accent not-italic font-black border-b-2 border-accent/30 decoration-none">
+                    distribution and design problem
+                  </mark>. 
+                  The ASHA worker network already exists, government funding already flows, and the disease burden is documented. What is missing is a{" "}
+                  <strong className="text-text not-italic border-b-2 border-gold/40">software layer</strong> built for offline-first, vernacular-first, low-cost-device environments.
+                </blockquote>
+              </Reveal>
+              
+              <span className="absolute -bottom-16 -right-4 text-8xl font-serif text-accent/10 pointer-events-none select-none rotate-180" aria-hidden="true">
+                &ldquo;
+              </span>
+            </div>
           </div>
-          <p className="font-serif text-xl md:text-3xl leading-relaxed italic text-text">
-            "The most solvable MedTech problem in Tripura is not a technology problem — it is a <strong className="text-accent not-italic relative inline-block after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-accent">distribution and design problem</strong>. The ASHA worker network already exists, government funding already flows, and the disease burden is documented. What is missing is a <strong className="text-accent not-italic">software layer</strong> built for offline-first, vernacular-first, low-cost-device environments."
-          </p>
         </div>
       </section>
 
@@ -323,7 +382,7 @@ export const LandingPage = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-16">
             <Reveal className="lg:col-span-2" delay={0.2}>
-              <div className="bg-card border border-border p-8 md:p-12 h-full">
+              <div className="glass-card p-8 md:p-12 h-full three-d-shadow hover:-translate-y-1 transition-all rounded-sm border-t-accent/20">
                 <h3 className="text-2xl font-serif font-bold mb-8">Infrastructure & Workforce</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="space-y-6">
@@ -407,8 +466,8 @@ export const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border border border-border">
             {/* Primary Opportunity */}
-            <Reveal id="ashasetu" className="md:col-span-2 relative" delay={0.2}>
-              <TiltCard className="bg-card p-8 md:p-12 border border-border group hover:bg-[#1c2a1e]/40 transition-colors overflow-hidden">
+            <Reveal delay={0.2}>
+              <TiltCard className="glass-card p-8 md:p-12 group transition-all overflow-hidden cursor-default three-d-shadow border-t-accent/30 rounded-sm">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-accent to-accent-light" />
                 <div className="absolute top-6 right-8 font-mono text-7xl md:text-9xl font-bold text-accent/5 pointer-events-none">#1</div>
                 
@@ -453,7 +512,7 @@ export const LandingPage = () => {
 
             {/* Opportunity 2 */}
             <Reveal className="relative" delay={0.3}>
-              <TiltCard className="bg-card p-10 h-full border border-border overflow-hidden group hover:bg-[#1c2a1e] transition-colors">
+              <TiltCard className="glass-card p-10 h-full overflow-hidden group transition-all three-d-shadow rounded-sm border-t-accent/10">
                 <div className="absolute top-6 right-8 font-mono text-7xl font-bold text-accent/5 pointer-events-none">#2</div>
                 <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
                   HARDWARE + SOFTWARE
@@ -467,7 +526,7 @@ export const LandingPage = () => {
 
             {/* Opportunity 3 */}
             <Reveal className="relative" delay={0.4}>
-              <TiltCard className="bg-card p-10 h-full border border-border overflow-hidden group hover:bg-[#1c2a1e] transition-colors">
+              <TiltCard className="glass-card p-10 h-full overflow-hidden group transition-all three-d-shadow rounded-sm border-t-accent/10">
                 <div className="absolute top-6 right-8 font-mono text-7xl font-bold text-accent/5 pointer-events-none">#3</div>
                 <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent font-mono text-[10px] tracking-widest px-3 py-1 rounded-sm mb-6">
                   AI / ML MODULE

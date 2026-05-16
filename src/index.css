@@ -6,9 +6,23 @@
   --font-sans: "DM Sans", sans-serif;
   --font-mono: "Space Mono", monospace;
 
-  --color-bg: #0a0f0d;
-  --color-surface: #111916;
-  --color-card: #162019;
+  --color-bg: #f8faf9;
+  --color-surface: #ffffff;
+  --color-card: #ffffff;
+  --color-accent: #2ab871;
+  --color-accent-light: #48e698;
+  --color-accent-dark: #1b7a4b;
+  --color-accent-warm: #ff6b35;
+  --color-text: #0d1a12;
+  --color-muted: #627269;
+  --color-border: rgba(42, 184, 113, 0.12);
+  --color-gold: #c5a059;
+}
+
+.dark {
+  --color-bg: #090c0a;
+  --color-surface: #121814;
+  --color-card: #181f1a;
   --color-accent: #3ddc84;
   --color-accent-light: #7fffd4;
   --color-accent-dark: #2a9e5c;
@@ -21,16 +35,49 @@
 
 @layer base {
   body {
-    @apply bg-bg text-text font-sans antialiased selection:bg-accent selection:text-bg;
+    @apply bg-bg text-text font-sans antialiased selection:bg-accent selection:text-white transition-colors duration-300;
     line-height: 1.7;
+    background-image: 
+      radial-gradient(circle at 0% 0%, rgba(42, 184, 113, 0.03) 0%, transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(42, 184, 113, 0.03) 0%, transparent 40%);
+  }
+
+  .dark body {
+    background-image: 
+      radial-gradient(circle at 0% 0%, rgba(61, 220, 132, 0.03) 0%, transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(61, 220, 132, 0.03) 0%, transparent 40%);
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-serif text-text;
   }
 }
 
 @layer utilities {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] transition-colors duration-300;
+  }
+
+  .dark .glass-card {
+    @apply bg-surface/40 backdrop-blur-xl border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)];
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .three-d-shadow {
+    box-shadow: 
+      0 1px 1px rgba(0,0,0,0.05), 
+      0 2px 2px rgba(0,0,0,0.05), 
+      0 4px 4px rgba(0,0,0,0.05), 
+      0 8px 8px rgba(0,0,0,0.05),
+      0 16px 16px rgba(0,0,0,0.05);
+  }
   .noise-overlay {
     position: fixed;
     inset: 0;
