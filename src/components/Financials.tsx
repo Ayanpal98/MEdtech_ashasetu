@@ -44,7 +44,7 @@ export const Financials = () => {
           <div className="max-w-2xl">
             <Reveal>
               <div className="font-sans text-[11px] text-accent font-black tracking-[0.3em] uppercase mb-6 flex items-center gap-2">
-                <BarChart3 size={14} /> 06 · FINANCIAL ARCHITECTURE
+                <BarChart3 size={14} /> 07 · FINANCIAL ARCHITECTURE
               </div>
               <h2 className="text-5xl md:text-7xl font-sans font-black text-white tracking-tighter leading-none mb-8">
                 Building for<br /><span className="text-white/30">Profit & Impact.</span>

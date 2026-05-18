@@ -150,6 +150,7 @@ export const LandingPage = () => {
   }, []);
 
   const navLinks = [
+    { name: 'Foundations', href: '#foundation' },
     { name: 'ASHASETU', href: '#ashasetu' },
     { name: 'Landscape', href: '#landscape' },
     { name: 'Opportunities', href: '#opportunities' },
@@ -374,6 +375,60 @@ export const LandingPage = () => {
         </div>
       </section>
 
+      {/* Strategic Foundation Section */}
+      <section id="foundation" className="py-24 bg-bg relative z-10 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 md:px-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <div>
+              <SectionLabel>01 · Foundation Reframe</SectionLabel>
+              <SectionTitle>Defining the<br /><span className="text-accent">Primary User</span></SectionTitle>
+              <Reveal delay={0.2}>
+                <p className="text-muted text-lg mb-8 leading-relaxed max-w-xl">
+                  Every GovTech health app defines the user as NHM/government. We break this cycle by shifting the focus entirely to the frontline.
+                </p>
+                <div className="inline-block p-8 bg-accent/5 border border-accent/20 rounded-sm relative group overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-accent" />
+                  <div className="relative z-10 font-serif text-2xl md:text-3xl font-black italic text-text leading-tight mb-4">
+                    "The ASHA worker is the primary user. The government is the beneficiary of her work."
+                  </div>
+                  <div className="text-[10px] text-muted tracking-widest uppercase font-mono">ASHASetu Strategic Principle 0.1</div>
+                </div>
+              </Reveal>
+            </div>
+
+            <div className="space-y-8 mt-12 lg:mt-0">
+              <Reveal delay={0.4}>
+                <div className="glass-card p-8 border-l-4 border-l-accent rounded-sm">
+                  <h4 className="text-xl font-bold font-serif mb-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                      <ShieldCheck size={20} />
+                    </div>
+                    Field-Validation Bible
+                  </h4>
+                  <p className="text-sm text-muted leading-relaxed">
+                    We don't prototype in silos. Our product bible is built by shadowing workers in <strong>Dhalai and Khowai</strong> district for full working days, documenting every friction point, confusion, and fear to ensure absolute alignment.
+                  </p>
+                </div>
+              </Reveal>
+
+              <Reveal delay={0.6}>
+                <div className="glass-card p-8 border-l-4 border-l-gold rounded-sm">
+                  <h4 className="text-xl font-bold font-serif mb-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold">
+                      <BadgeCheck size={20} />
+                    </div>
+                    Paper Replacement Threshold
+                  </h4>
+                  <p className="text-sm text-muted leading-relaxed">
+                    ASHASetu ships ONLY when it makes paper registers redundant. We are currently mapping and digitizing the exhaustive NHM Household Registers, MCP cards, and Incentive claim formats.
+                  </p>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Tripura Healthcare Landscape */}
       <section id="landscape" className="py-24 relative z-10 bg-bg" aria-labelledby="landscape-title">
         <div className="max-w-7xl mx-auto px-6 md:px-10">
@@ -575,7 +630,6 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* New Sections */}
       <DiseaseBurden />
       <Roadmap3D />
       <Financials />

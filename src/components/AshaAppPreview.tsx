@@ -20,11 +20,14 @@ import {
   Phone,
   MapPin,
   Cpu,
-  Database
+  Database,
+  FileText,
+  Volume2
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { useTheme } from '../lib/themeContext';
 import { Sun, Moon } from 'lucide-react';
+import { ThreeDLogo } from './ThreeDLogo';
 
 export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean }) => {
   const triggerHaptic = (pattern: number | number[] = 15) => {
@@ -53,7 +56,7 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
   const [isSyncing, setIsSyncing] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
-  const [pendingRecords, setPendingRecords] = useState(3);
+  const [pendingRecords, setPendingRecords] = useState(47); // Updated to 47 per user prompt
   const [isOffline, setIsOffline] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [symptoms, setSymptoms] = useState<{ cough: boolean | null, fever: boolean | null }>({
@@ -102,7 +105,12 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
       generateReferral: 'রেফারেল তৈরি করুন',
       savedToLocal: 'রেকর্ড লোকাল স্টোরেজে সংরক্ষিত হয়েছে',
       syncedToCloud: 'সব রেকর্ড এনএইচএম ক্লাউডে সিঙ্ক হয়েছে',
-      noRecords: 'সিঙ্ক করার কোনো রেকর্ড নেই'
+      noRecords: 'সিঙ্ক করার কোনো রেকর্ড নেই',
+      migrationTitle: 'কাগজের খাতা ডিজিটাল করুন',
+      migrationDesc: 'আপনার পুরনো খাতার ছবি তুলুন। আমরা ডেটা মাইগ্রেট করে দেব।',
+      migrationAction: 'ফটো তুলুন',
+      systemHealth: 'সিস্টেম হেলথ',
+      batteryText: 'ব্যাটারি ড্রেন: <৮% (আজ)',
     },
     kb: {
       appName: 'ASHASETU',
@@ -144,7 +152,12 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
       generateReferral: 'Referral Khunai',
       savedToLocal: 'Record save wungbai local storage-o',
       syncedToCloud: 'NHM Cloud-o sync wungbai',
-      noRecords: 'Sync khunai baki kwrwi'
+      noRecords: 'Sync khunai baki kwrwi',
+      migrationTitle: 'Capture Paper Register',
+      migrationDesc: 'Take a photo of your old register. We will migrate your data.',
+      migrationAction: 'Take Photo',
+      systemHealth: 'System Health',
+      batteryText: 'Battery Drain: <8% (Today)',
     }
   };
 
@@ -197,6 +210,7 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
       case 'patients': return t.patientList || t.patients;
       case 'alerts': return t.alerts;
       case 'people': return t.people;
+      case 'migration': return t.migrationTitle;
       default: return t.appName;
     }
   };
@@ -406,15 +420,20 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
                 <button 
                   onClick={handleSync}
                   disabled={isSyncing}
-                  className="group relative flex items-center gap-3 glass-card px-4 py-2 rounded-full hover:bg-white transition-all active:scale-95 disabled:opacity-50 overflow-hidden shadow-lg shadow-accent/5"
+                  className="group relative flex flex-col items-center gap-2 glass-card px-6 py-3 rounded-3xl hover:bg-white transition-all active:scale-95 disabled:opacity-50 overflow-hidden shadow-lg shadow-accent/10 border-t-accent/20"
                 >
-                  <RefreshCw size={14} className={`text-accent ${isSyncing ? 'animate-spin' : ''}`} />
-                  <span className="text-[10px] text-text font-bold tracking-tight">
-                    {isSyncing ? t.syncing : t.pending(pendingRecords)}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <RefreshCw size={14} className={`text-accent ${isSyncing ? 'animate-spin' : ''}`} />
+                    <span className="text-[12px] text-text font-black tracking-tight">
+                      {isSyncing ? t.syncing : t.pending(pendingRecords)}
+                    </span>
+                  </div>
+                  {!isSyncing && (
+                    <span className="text-[9px] text-muted uppercase font-bold tracking-widest">{`Waiting for Network`}</span>
+                  )}
                   {isSyncing && (
                     <motion.div 
-                      className="absolute inset-x-0 bottom-0 h-[2px] bg-accent"
+                      className="absolute inset-x-0 bottom-0 h-[3px] bg-accent"
                       initial={{ scaleX: 0 }}
                       animate={{ scaleX: 1 }}
                       transition={{ duration: 2 }}
@@ -459,7 +478,7 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               </div>
 
               {/* Main Actions */}
-              <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <button 
                   onClick={() => {
                     triggerHaptic(15);
@@ -494,6 +513,24 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
                   <span className="text-[16px] font-black text-text tracking-tighter leading-none">{t.screening}</span>
                 </button>
               </div>
+
+              {/* Paper Register Migration Action (Step 1.2) */}
+              <button 
+                onClick={() => {
+                  triggerHaptic(15);
+                  setScreen('migration');
+                }}
+                className="w-full glass-card p-5 rounded-[28px] mb-8 flex items-center gap-5 hover:bg-white transition-all shadow-xl three-d-shadow border-t-gold/20 group"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold border border-gold/20 group-hover:scale-110 transition-transform">
+                  <FileText size={20} />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-[14px] font-black text-text tracking-tight uppercase leading-none mb-1">Paper Migration</div>
+                  <div className="text-[10px] text-muted font-medium">Replace your physical registers</div>
+                </div>
+                <ChevronRight size={16} className="text-muted" />
+              </button>
 
               {/* Recent Referrals */}
               <div className="mb-10">
@@ -781,6 +818,10 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
                     <span className="text-[11px] text-text font-black tracking-tighter">142.8 MB / 2.0 GB</span>
                   </div>
                   <div className="flex justify-between items-center bg-black/5 p-3 rounded-2xl border border-black/5">
+                    <span className="text-[11px] text-muted font-medium">Battery Efficiency</span>
+                    <span className="text-[11px] text-accent font-black tracking-tighter">Healthy (&lt;8% use)</span>
+                  </div>
+                  <div className="flex justify-between items-center bg-black/5 p-3 rounded-2xl border border-black/5">
                     <span className="text-[11px] text-muted font-medium">Encryption</span>
                     <span className="text-[11px] text-accent font-black tracking-tighter">AES-256 Enabled</span>
                   </div>
@@ -803,9 +844,14 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
               </div>
               
               <div className="space-y-8">
-                <div className="space-y-3">
+                <div className="space-y-3 relative">
                   <label className={`${fullScreen ? 'text-sm' : 'text-[10px]'} text-accent font-black uppercase tracking-widest ml-1`}>{t.fullName}</label>
-                  <input type="text" className={`w-full glass-card rounded-2xl text-text outline-none focus:border-accent/40 focus:bg-white transition-all shadow-inner border-border ${fullScreen ? 'p-6 text-xl' : 'p-4 text-[14px]'}`} placeholder="Enter patient name..." />
+                  <div className="relative">
+                    <input type="text" className={`w-full glass-card rounded-2xl text-text outline-none focus:border-accent/40 focus:bg-white transition-all shadow-inner border-border ${fullScreen ? 'p-6 text-xl pr-16' : 'p-4 text-[14px] pr-12'}`} placeholder="Enter patient name..." />
+                    <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-accent hover:bg-accent/10 rounded-xl transition-colors" aria-label="Voice Input">
+                      <Mic size={fullScreen ? 24 : 18} />
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-3">
                   <label className={`${fullScreen ? 'text-sm' : 'text-[10px]'} text-accent font-black uppercase tracking-widest ml-1`}>{t.aadhar}</label>
@@ -847,6 +893,80 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
             </motion.div>
           )}
 
+          {screen === 'migration' && language && (
+            <motion.div
+              key="migration"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              className="space-y-8 pb-32"
+            >
+              <div className="mb-4">
+                <div className="text-[10px] text-accent font-bold uppercase tracking-[0.2em] mb-1">Step 1.2</div>
+                <div className="text-2xl font-serif font-black text-text tracking-tighter">{t.migrationTitle}</div>
+              </div>
+
+              <div className="glass-card p-8 rounded-[36px] border-t-gold/20 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-4 right-4 animate-pulse">
+                  <div className="w-2 h-2 bg-gold rounded-full" />
+                </div>
+                <div className="flex flex-col items-center text-center space-y-6">
+                  <div className="w-24 h-24 rounded-[32px] bg-gold/10 flex items-center justify-center text-gold border border-gold/20 shadow-inner">
+                    <Camera size={48} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-text mb-2">{t.migrationAction}</h3>
+                    <p className="text-[12px] text-muted leading-relaxed">
+                      {t.migrationDesc}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="text-[10px] text-muted font-bold tracking-widest uppercase ml-1">Supported Paper Formats</div>
+                <div className="grid grid-cols-1 gap-2">
+                  {['NHM Household Register', 'MCP Care Cards', 'Incentive Formats', 'High Risk Tracker'].map(format => (
+                    <div key={format} className="flex items-center gap-3 p-4 glass-card rounded-2xl border-white/40">
+                      <CheckCircle2 size={14} className="text-accent" />
+                      <span className="text-[11px] font-bold text-text/80">{format}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6 bg-accent/5 rounded-3xl border border-accent/10">
+                <div className="flex items-start gap-4">
+                  <div className="mt-1">
+                    <Activity size={16} className="text-accent" />
+                  </div>
+                  <div>
+                    <div className="text-[12px] font-black text-text mb-1 uppercase tracking-tight">AI OCR Migration</div>
+                    <p className="text-[10px] text-muted leading-relaxed">
+                      Our edge-AI will process handwritten Bengali/Kokborok text from your photos and populate your digital directory automatically.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  triggerHaptic([40, 20, 40]);
+                  triggerToast('AI Scanning Registry...');
+                  setTimeout(() => {
+                    setPendingRecords(prev => prev + 12);
+                    setShowToast(true);
+                    setToastMsg('12 Records Migrated Successfully');
+                    setScreen('home');
+                  }, 2000);
+                }}
+                className="w-full bg-gold text-white font-black py-4 rounded-[24px] text-[15px] flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(197,160,89,0.3)] active:scale-95 transition-all uppercase tracking-tight"
+              >
+                <Camera size={18} /> {t.migrationAction}
+              </button>
+            </motion.div>
+          )}
+
           {screen === 'screening' && language && (
             <motion.div
               key="screening"
@@ -860,8 +980,11 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
                 <div className="text-2xl font-serif font-black text-text tracking-tighter">Clinical Edge AI</div>
               </div>
               
-              <div className="glass-card p-6 rounded-[32px] space-y-6 shadow-xl three-d-shadow border-t-accent/10">
-                <p className="text-[15px] font-medium text-text tracking-tight leading-snug">{t.coughQuestion}</p>
+              <div className="glass-card p-6 rounded-[32px] space-y-6 shadow-xl three-d-shadow border-t-accent/10 relative">
+                <button className="absolute top-4 right-4 p-2 text-accent/40 hover:text-accent transition-colors" aria-label="Voice Playback">
+                  <Volume2 size={16} />
+                </button>
+                <p className="text-[15px] font-medium text-text tracking-tight leading-snug pr-8">{t.coughQuestion}</p>
                 <div className="flex gap-3">
                   <button 
                     onClick={() => {
@@ -884,8 +1007,11 @@ export const AshaAppPreview = ({ fullScreen = false }: { fullScreen?: boolean })
                 </div>
               </div>
 
-              <div className="glass-card p-6 rounded-[32px] space-y-6 shadow-xl three-d-shadow border-t-accent/10">
-                <p className="text-[15px] font-medium text-text tracking-tight leading-snug">{t.feverQuestion}</p>
+              <div className="glass-card p-6 rounded-[32px] space-y-6 shadow-xl three-d-shadow border-t-accent/10 relative">
+                <button className="absolute top-4 right-4 p-2 text-accent/40 hover:text-accent transition-colors" aria-label="Voice Playback">
+                  <Volume2 size={16} />
+                </button>
+                <p className="text-[15px] font-medium text-text tracking-tight leading-snug pr-8">{t.feverQuestion}</p>
                 <div className="flex gap-3">
                   <button 
                     onClick={() => {

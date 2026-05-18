@@ -68,7 +68,7 @@ export const DiseaseBurden = () => {
           <div className="max-w-2xl">
             <Reveal>
               <div className="font-sans text-[11px] text-accent font-black tracking-[0.3em] uppercase mb-6 flex items-center gap-2">
-                <AlertTriangle size={14} /> 04 · DISEASE BURDEN
+                <AlertTriangle size={14} /> 05 · DISEASE BURDEN
               </div>
               <h2 className="text-5xl md:text-7xl font-sans font-black text-white tracking-tighter leading-none mb-8">
                 The Cost of<br /><span className="text-white/30">Delayed Data.</span>

@@ -84,7 +84,7 @@ export const Roadmap3D = () => {
         <Reveal>
           <div className="text-center mb-24">
             <div className="font-sans text-[12px] text-accent font-black tracking-[0.4em] uppercase mb-8">
-              05 · MISSION ROADMAP
+              06 · MISSION ROADMAP
             </div>
             <h2 className="text-6xl md:text-8xl font-sans font-black text-white tracking-tighter leading-none mb-10">
               The Path to<br /><span className="text-white/20">Digital Sovereignty.</span>

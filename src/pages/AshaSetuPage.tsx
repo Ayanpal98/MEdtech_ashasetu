@@ -14,7 +14,9 @@ import {
   Layers,
   Lock,
   Maximize2,
-  X
+  X,
+  FileText,
+  Mic
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AshaAppPreview } from '../components/AshaAppPreview';
@@ -218,18 +220,18 @@ export const AshaSetuPage = () => {
             {[
               {
                 icon: <Server size={40} />,
-                title: 'CRDT Sync Engine',
-                desc: 'Conflict-free Replicated Data Types ensure that data recorded on thousands of devices never overlaps during synchronization.'
+                title: 'Offline-First Engine',
+                desc: 'Not occasional connectivity. We utilize local SQLite for sub-millisecond persistence of all records, guaranteed for 30 days of disconnected operation.'
               },
               {
-                icon: <Lock size={40} />,
-                title: 'AES-256 Protocol',
-                desc: 'Zero-trust security architecture. Every patient record is encrypted at the point of entry before being committed locally.'
+                icon: <FileText size={40} />,
+                title: 'Paper Replacement',
+                desc: 'Mapping 1:1 NHM Tripura paper formats into digital logic. Ships with an AI-OCR migrator that digests existing physical registers into the system.'
               },
               {
                 icon: <Layers size={40} />,
-                title: 'Multi-Lingual NLP',
-                desc: 'Offline voice-to-text models for Bengali and Kokborok allows workers to maintain focus on patient interaction.'
+                title: 'Vernacular-Native',
+                desc: 'Zero-literacy, voice-driven interfaces in Bengali and Kokborok. No English fallback — just frontline intelligence built for Tripura.'
               }
             ].map((spec, i) => (
               <Reveal key={i} delay={0.1 * i}>
@@ -270,32 +272,32 @@ export const AshaSetuPage = () => {
             {[
               {
                 icon: <Globe size={32} />,
-                title: "Language First",
-                desc: "Choose between Bengali or Kokborok for an interface that feels like home.",
+                title: "Register Paper",
+                desc: "Take a photo of physical registers. Our AI OCR migrates the data. Throw away the paper.",
                 delay: 0
               },
               {
-                icon: <Database size={32} />,
-                title: "Register Offline",
-                desc: "Add patient details and Aadhar records even with zero internet bars.",
+                icon: <Mic size={32} />,
+                title: "Voice-First UX",
+                desc: "Speak in Bengali/Kokborok to fill forms. No typing required for core registration.",
                 delay: 0.1
               },
               {
                 icon: <Activity size={32} />,
-                title: "Smart Screening",
-                desc: "Answer basic questions and let the built-in AI check for health risks.",
+                title: "Bio-AI Screening",
+                desc: "On-device AI checking for TB symptoms. Works with zero cellular signal.",
                 delay: 0.2
               },
               {
                 icon: <Zap size={32} />,
-                title: "One-Tap Sync",
-                desc: "When you get signal, the sync button sends all records to the cloud securely.",
+                title: "Sync Log",
+                desc: "Track pending records. The app syncs automatically once a signal is detected.",
                 delay: 0.3
               },
               {
                 icon: <ShieldCheck size={32} />,
                 title: "Expert Support",
-                desc: "Instantly call Medical Officers if the AI flags a critical emergency.",
+                desc: "Instant calls to Medical Officers when high-risk cases are detected.",
                 delay: 0.4
               }
             ].map((step, i) => (
