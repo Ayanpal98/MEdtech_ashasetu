@@ -25,6 +25,7 @@ import { ThreeDLogo } from '../components/ThreeDLogo';
 import { ParticleCanvas } from '../components/ParticleCanvas';
 import { DelayReductionChart } from '../components/DelayReductionChart';
 import { AshaAppPreview } from '../components/AshaAppPreview';
+import { AshaEnterpriseDashboard } from '../components/AshaEnterpriseDashboard';
 import { AshaTrainingModule } from '../components/AshaTrainingModule';
 import { StartupDetails } from '../components/StartupDetails';
 import { ContactForm } from '../components/ContactForm';
@@ -131,6 +132,7 @@ export const LandingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -274,6 +276,36 @@ export const LandingPage = () => {
         </AnimatePresence>
       </nav>
 
+      {/* Enterprise Dashboard Modal */}
+      <AnimatePresence>
+        {isDashboardOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1000] bg-bg flex flex-col"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="h-16 border-b border-border flex items-center justify-between px-8 bg-surface/80 backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <ThreeDLogo size={24} />
+                <span className="font-sans font-black tracking-tighter text-lg uppercase leading-none block text-text">Enterprise Dashboard</span>
+              </div>
+              <button 
+                onClick={() => setIsDashboardOpen(false)}
+                className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all border border-black/10"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 bg-surface overflow-hidden relative">
+              <AshaEnterpriseDashboard />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <main>
         {/* Hero Section */}
         <section id="hero" className="relative min-h-screen pt-[60px] flex flex-col lg:flex-row overflow-hidden" aria-labelledby="hero-title">
@@ -307,29 +339,34 @@ export const LandingPage = () => {
           </Reveal>
 
           <Reveal delay={0.9} className="flex flex-wrap gap-4">
-            <Link to="/ashasetu" className="bg-accent text-bg font-bold text-sm px-8 py-4 rounded-sm hover:bg-accent-light hover:-translate-y-0.5 transition-all shadow-lg shadow-accent/20">
-              Launch ASHASETU Demo
+            <button 
+              onClick={() => setIsDashboardOpen(true)}
+              className="bg-accent text-bg font-bold text-sm px-8 py-4 rounded-sm hover:bg-accent-light hover:-translate-y-0.5 transition-all shadow-lg shadow-accent/20"
+            >
+              Launch Enterprise Demo
+            </button>
+            <Link to="/ashasetu" className="bg-transparent border border-white/15 text-text font-medium text-sm px-8 py-4 rounded-sm hover:border-accent hover:text-accent transition-all flex items-center gap-2">
+              Launch ASHASETU Page <ChevronRight size={16} />
             </Link>
-            <a href="#opportunities" className="bg-transparent border border-white/15 text-text font-medium text-sm px-8 py-4 rounded-sm hover:border-accent hover:text-accent transition-all flex items-center gap-2">
-              Market Opportunities <ChevronRight size={16} />
-            </a>
           </Reveal>
         </div>
 
         <div className="flex-1 flex items-center justify-center p-6 md:p-10 relative z-10">
           <div className="grid grid-cols-2 gap-0.5 w-full max-w-md">
             {[
-              { num: '4,000+', label: 'ASHA workers in Tripura without digital tools' },
-              { num: '39%', label: 'of Primary Health Centres lack lab technicians' },
-              { num: '0', label: 'MedTech startups currently operating in NE India' },
-              { num: '8', label: 'Northeast states sharing the same structural healthcare gap' }
+              { num: '4,000+', label: 'ASHA workers in Tripura without digital tools', action: () => setIsDashboardOpen(true) },
+              { num: '39%', label: 'of Primary Health Centres lack lab technicians', action: () => setIsDashboardOpen(true) },
+              { num: '0', label: 'MedTech startups currently operating in NE India', action: () => setIsDashboardOpen(true) },
+              { num: '8', label: 'Northeast states sharing the same structural healthcare gap', action: () => setIsDashboardOpen(true) }
             ].map((stat, i) => (
               <Reveal key={i} delay={1 + i * 0.1} className="relative z-10">
                 <TiltCard className="glass-card p-7 h-full overflow-hidden group hover:border-accent/40 transition-all cursor-pointer three-d-shadow hover:-translate-y-1">
-                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-accent to-transparent" />
-                  <div className="text-3xl md:text-4xl font-serif font-black text-accent mb-2">{stat.num}</div>
-                  <div className="text-[11px] text-muted leading-tight uppercase tracking-wider">{stat.label}</div>
-                  <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/10 transition-all" />
+                  <button onClick={stat.action} className="text-left w-full h-full">
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-accent to-transparent" />
+                    <div className="text-3xl md:text-4xl font-serif font-black text-accent mb-2">{stat.num}</div>
+                    <div className="text-[11px] text-muted leading-tight uppercase tracking-wider">{stat.label}</div>
+                    <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/10 transition-all" />
+                  </button>
                 </TiltCard>
               </Reveal>
             ))}

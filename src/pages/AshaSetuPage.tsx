@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AshaAppPreview } from '../components/AshaAppPreview';
+import { AshaEnterpriseDashboard } from '../components/AshaEnterpriseDashboard';
 import { ThreeDLogo } from '../components/ThreeDLogo';
 import { ThemeToggle } from '../components/ThemeToggle';
 
@@ -53,6 +54,7 @@ const TiltCard: React.FC<{ children: React.ReactNode, className?: string }> = ({
 
 export const AshaSetuPage = () => {
   const [isDemoFullScreen, setIsDemoFullScreen] = useState(false);
+  const [demoType, setDemoType] = useState<'field' | 'enterprise'>('field');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -82,6 +84,20 @@ export const AshaSetuPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-6">
+                <div className="flex bg-black/5 p-1 rounded-xl border border-black/10">
+                  <button 
+                    onClick={() => setDemoType('field')}
+                    className={`px-4 py-2 rounded-lg font-sans text-[10px] font-black uppercase tracking-widest transition-all ${demoType === 'field' ? 'bg-white text-accent shadow-sm' : 'text-muted hover:text-text'}`}
+                  >
+                    Field App
+                  </button>
+                  <button 
+                    onClick={() => setDemoType('enterprise')}
+                    className={`px-4 py-2 rounded-lg font-sans text-[10px] font-black uppercase tracking-widest transition-all ${demoType === 'enterprise' ? 'bg-white text-accent shadow-sm' : 'text-muted hover:text-text'}`}
+                  >
+                    Enterprise
+                  </button>
+                </div>
                 <button 
                   onClick={() => setIsDemoFullScreen(false)}
                   className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-black/5 hover:bg-black/10 transition-all border border-black/10 font-sans text-[11px] font-black uppercase tracking-widest"
@@ -104,7 +120,13 @@ export const AshaSetuPage = () => {
               </div>
             </div>
             <div className="flex-1 relative overflow-hidden bg-bg">
-              <AshaAppPreview fullScreen={true} />
+              {demoType === 'field' ? (
+                <AshaAppPreview fullScreen={true} />
+              ) : (
+                <div className="w-full h-full p-4 md:p-8 bg-surface overflow-auto">
+                  <AshaEnterpriseDashboard />
+                </div>
+              )}
             </div>
             <div className="h-16 border-t border-border bg-surface/60 flex items-center justify-between px-10">
               <div className="font-sans text-[11px] text-muted font-bold tracking-[0.2em] uppercase flex items-center gap-4">
@@ -180,14 +202,17 @@ export const AshaSetuPage = () => {
             <Reveal delay={0.4} className="relative group/device">
               <div className="absolute inset-0 bg-accent/10 blur-[150px] rounded-full -z-10 group-hover/device:bg-accent/20 transition-all duration-1000 opacity-50" />
               <div className="relative z-10 flex justify-center transform lg:rotate-6 hover:rotate-2 transition-transform duration-1000">
-                 <div className="relative cursor-pointer" onClick={() => setIsDemoFullScreen(true)}>
+                 <div className="relative cursor-pointer" onClick={() => {
+                      setDemoType('field');
+                      setIsDemoFullScreen(true);
+                    }}>
                     <div className="absolute -inset-4 glass-card rounded-[64px] -z-10 shadow-2xl" />
                     <AshaAppPreview />
                     <div className="absolute inset-0 bg-white/20 opacity-0 group-hover/device:opacity-100 transition-opacity backdrop-blur-md rounded-[48px] flex flex-col items-center justify-center border-4 border-accent/20">
                       <div className="w-20 h-20 rounded-3xl bg-accent text-white flex items-center justify-center shadow-[0_20px_40px_rgba(42,184,113,0.3)] animate-pulse active:scale-90 transition-transform">
                         <Maximize2 size={36} />
                       </div>
-                      <span className="mt-6 font-sans text-[12px] text-accent font-black uppercase tracking-[0.3em] bg-white/80 px-6 py-3 rounded-2xl border border-accent/30 backdrop-blur-xl shadow-lg">Launch Live Experience</span>
+                      <span className="mt-6 font-sans text-[12px] text-accent font-black uppercase tracking-[0.3em] bg-white/80 px-6 py-3 rounded-2xl border border-accent/30 backdrop-blur-xl shadow-lg">Launch Field App</span>
                     </div>
                  </div>
               </div>
@@ -393,14 +418,23 @@ export const AshaSetuPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <button 
-                onClick={() => setIsDemoFullScreen(true)}
+                onClick={() => {
+                  setDemoType('enterprise');
+                  setIsDemoFullScreen(true);
+                }}
                 className="w-full sm:w-auto bg-accent text-white px-12 py-6 rounded-[24px] font-black text-base hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(42,184,113,0.3)]"
               >
-                Start Demo <Maximize2 size={24} />
+                Launch Enterprise Demo <Maximize2 size={24} />
               </button>
-              <Link to="/" className="w-full sm:w-auto bg-white border border-border text-text px-12 py-6 rounded-[24px] font-black text-base hover:bg-muted/5 transition-all flex items-center justify-center gap-3 shadow-sm">
-                Return to Homepage <Globe size={24} />
-              </Link>
+              <button 
+                onClick={() => {
+                  setDemoType('field');
+                  setIsDemoFullScreen(true);
+                }}
+                className="w-full sm:w-auto bg-surface border border-border text-text px-12 py-6 rounded-[24px] font-black text-base hover:bg-muted/5 transition-all flex items-center justify-center gap-3 shadow-sm"
+              >
+                Field App Preview <Activity size={24} />
+              </button>
             </div>
           </Reveal>
         </div>
