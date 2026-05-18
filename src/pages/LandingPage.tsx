@@ -308,7 +308,7 @@ export const LandingPage = () => {
 
           <Reveal delay={0.9} className="flex flex-wrap gap-4">
             <Link to="/ashasetu" className="bg-accent text-bg font-bold text-sm px-8 py-4 rounded-sm hover:bg-accent-light hover:-translate-y-0.5 transition-all shadow-lg shadow-accent/20">
-              See ASHASETU Dedicated Page
+              Launch ASHASETU Demo
             </Link>
             <a href="#opportunities" className="bg-transparent border border-white/15 text-text font-medium text-sm px-8 py-4 rounded-sm hover:border-accent hover:text-accent transition-all flex items-center gap-2">
               Market Opportunities <ChevronRight size={16} />
@@ -538,8 +538,8 @@ export const LandingPage = () => {
                     </p>
                     
                     <div className="flex gap-4 mb-8">
-                      <Link to="/ashasetu" className="text-[12px] font-bold text-accent border border-accent/30 px-6 py-3 rounded-sm hover:bg-accent/10 transition-colors shadow-lg shadow-accent/5">
-                        Deep Dive: Technical Overview →
+                      <Link to="/ashasetu" className="text-[12px] font-bold text-accent border border-accent/30 px-6 py-3 rounded-sm hover:bg-accent/10 transition-colors shadow-lg shadow-accent/5 flex items-center gap-2">
+                        Try Full Live Prototype <ExternalLink size={14} />
                       </Link>
                     </div>
 

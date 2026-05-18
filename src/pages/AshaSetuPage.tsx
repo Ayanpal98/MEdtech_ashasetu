@@ -81,13 +81,27 @@ export const AshaSetuPage = () => {
                   <span className="text-[10px] text-accent font-bold uppercase tracking-widest">Live Experience Session</span>
                 </div>
               </div>
-              <button 
-                onClick={() => setIsDemoFullScreen(false)}
-                className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all border border-black/10"
-                aria-label="Close demo"
-              >
-                <X size={24} />
-              </button>
+              <div className="flex items-center gap-6">
+                <button 
+                  onClick={() => setIsDemoFullScreen(false)}
+                  className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-black/5 hover:bg-black/10 transition-all border border-black/10 font-sans text-[11px] font-black uppercase tracking-widest"
+                >
+                  <ArrowLeft size={14} /> Close Preview
+                </button>
+                <Link 
+                  to="/"
+                  className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-accent text-white hover:bg-accent-light transition-all shadow-lg shadow-accent/20 font-sans text-[11px] font-black uppercase tracking-widest"
+                >
+                  <Globe size={14} /> Back to Website
+                </Link>
+                <button 
+                  onClick={() => setIsDemoFullScreen(false)}
+                  className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all border border-black/10"
+                  aria-label="Close demo"
+                >
+                  <X size={24} />
+                </button>
+              </div>
             </div>
             <div className="flex-1 relative overflow-hidden bg-bg">
               <AshaAppPreview fullScreen={true} />
@@ -112,7 +126,7 @@ export const AshaSetuPage = () => {
             </div>
             <div className="flex items-center gap-2">
               <ThreeDLogo size={24} />
-              <span className="font-sans text-[11px] font-black tracking-[0.2em] text-muted tracking-widest uppercase group-hover:text-text transition-colors">Back to System</span>
+              <span className="font-sans text-[11px] font-black tracking-[0.2em] text-muted tracking-widest uppercase group-hover:text-text transition-colors">Back to Website</span>
             </div>
           </Link>
           <div className="flex items-center gap-6">
@@ -385,7 +399,7 @@ export const AshaSetuPage = () => {
                 Start Demo <Maximize2 size={24} />
               </button>
               <Link to="/" className="w-full sm:w-auto bg-white border border-border text-text px-12 py-6 rounded-[24px] font-black text-base hover:bg-muted/5 transition-all flex items-center justify-center gap-3 shadow-sm">
-                Contact ATSFY <ChevronRight size={24} />
+                Return to Homepage <Globe size={24} />
               </Link>
             </div>
           </Reveal>
